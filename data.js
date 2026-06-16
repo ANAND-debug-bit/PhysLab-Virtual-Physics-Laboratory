@@ -164,4 +164,149 @@ steps: [ 'Dip a clean capillary tube vertically in water.',
 }
 ]
 },
+//04
+waves: { title: 'Waves & Thermodynamics',
+icon: '〰️',
+desc: 'Experiment with sound resonance, sonometer, Newton\'s law of cooling, and specific heat calorimetry.',
+instruments: [
+{ id: 'resonance',
+icon: '🔔',
+title: 'Resonance Tube',
+desc: 'Find speed of sound in air by resonance of a closed organ pipe at first and second resonance lengths.',
+info: {
+about: 'A resonance tube is a closed pipe. When a vibrating tuning fork is held at the open end, resonance (loudest sound) occurs when the air column length is an odd multiple of λ/4.',
+formula: 'v = 2f(L₂ − L₁) | λ/4 = L₁+e, 3λ/4 = L₂+e',
+lc: 'Metre scale: 1 mm',
+steps: [ 'Fill the resonance tube with water to near the top.',
+'Hold a vibrating tuning fork (known f) at the open end.',
+'Lower the water slowly until resonance (loudest sound) — this is L₁.',
+'Continue lowering until next resonance — this is L₂.',
+'Speed v = 2f(L₂ − L₁).'
+]
+}
+},
 
+{ id: 'sonometer',
+icon: '🎵',
+title: 'Sonometer',
+desc: 'Verify the laws of vibrating strings and find the frequency of a tuning fork.',
+info: {
+about: 'A sonometer (monochord) consists of a wire stretched over a soundboard. By varying tension, length, and mass per unit length, we verify the laws of transverse vibrations.',
+formula: 'f = (1/2L)√(T/μ)',
+lc: 'Metre scale: 1 mm',
+steps: ['Stretch the wire with a known tension T (using hanging weights).',
+'Adjust vibrating length L until it resonates with tuning fork.',
+'Record L, T, and calculate f = (1/2L)√(T/μ).',
+'Verify: f ∝ 1/L (constant T), f ∝ √T (constant L).'
+]
+}
+},
+
+{ id: 'cooling',
+icon: '🌡️',
+title: "Newton's Law of Cooling",
+desc: 'Verify Newton\'s Law of Cooling by plotting temperature vs time for hot water.',
+info: { about: "Newton's Law of Cooling states that the rate of cooling is proportional to the temperature difference between the body and its surroundings, for small temperature differences.",
+formula: 'dT/dt = -k(T - T₀)  →  T - T₀ = (T_i - T₀)e^(-kt)',
+lc: 'Thermometer: 0.5°C, Stop-watch: 0.1 s',
+steps: [ 'Fill a calorimeter with hot water (~80°C).',
+'Record temperature every 2 minutes as it cools.',
+'Note ambient temperature T₀.',
+'Plot log(T−T₀) vs time — should be a straight line.',
+'Slope = −k (cooling constant).'
+]
+}
+}
+]
+},
+//05
+optics: { title: 'Ray & Wave Optics',
+icon: '🔭',
+desc: 'Explore lens optics, prism spectrometers, optical benches, and interference patterns.',
+instruments: [
+{ id: 'lens',
+icon: '🔎',
+title: 'Lens Formula (Optical Bench)',
+desc: 'Verify the lens formula and find the focal length of a convex lens using an optical bench.',
+info: { about: 'The thin lens formula relates object distance u, image distance v, and focal length f. Using an optical bench, we can precisely measure u and v for various object positions.',
+formula: '1/f = 1/v − 1/u  (sign convention: distances from lens)',
+lc: 'Optical bench: 1 mm',
+steps: [ 'Mount the lens at the centre of the optical bench.',
+'Place illuminated object (pin/bulb) at a known distance u.',
+'Find image position on the other side and note v.',
+'Calculate f from 1/f = 1/v − 1/u.',
+'Repeat for different u; plot 1/v vs 1/u.'
+]
+}
+},
+{ id: 'prism',
+icon: '🌈',
+title: 'Prism Spectrometer',
+desc: 'Find refractive index of glass and angle of minimum deviation for a prism.',
+info: { about: 'A prism bends light. At the angle of minimum deviation (D_m), refraction is symmetric. The refractive index n depends on the prism angle A and D_m.',
+formula: 'n = sin((A+D_m)/2) / sin(A/2)',
+lc: 'Spectrometer vernier: 1 arcminute',
+steps: [ 'Find angle A of prism by rotating prism and noting reflected image positions.',
+'Set up white light source and adjust spectrometer.',
+'Rotate prism to find angle of minimum deviation D_m for each color.',
+'Apply n = sin((A+D_m)/2) / sin(A/2).'
+]
+}
+}
+]
+},
+//06
+electro: { title: 'Electrodynamics & Magnetism',
+icon: '⚡',
+desc: 'Hands-on circuits — Ohm\'s Law, Wheatstone Bridge, potentiometer, and galvanometer experiments.',
+instruments: [ 
+{ id: 'ohm',
+icon: 'Ω',
+title: "Ohm's Law",
+desc: 'Verify Ohm\'s Law and plot V-I characteristics of a resistor.',
+info: { about: "Ohm's Law states that the current through a conductor is directly proportional to the voltage across it, at constant temperature. V = IR, where R is the resistance (constant for ohmic conductors).",
+formula: 'V = IR  →  R = V/I  →  Slope of V-I graph',
+lc: 'Ammeter: 0.1 A, Voltmeter: 0.1 V',
+steps: [ 'Connect resistor, ammeter, voltmeter, rheostat in circuit.',
+'Vary rheostat to change current; note V and I at each step.',
+'Plot V on Y-axis vs I on X-axis.',
+'Slope of V-I graph = resistance R.',
+'A straight line through origin verifies Ohm\'s Law.'
+]
+}
+},
+
+{ id: 'wheatstone',
+icon: '🕸️',
+title: 'Wheatstone Bridge',
+desc: 'Find unknown resistance using a Wheatstone bridge (meter bridge).',
+info: { about: 'The Wheatstone bridge uses the principle of null deflection. When the galvanometer shows zero current, the bridge is balanced: P/Q = R/S. A meter bridge is a practical form using a 1-metre resistance wire.',
+formula: 'R/S = P/Q  |  S = R × Q/P  (Meter bridge: S = R(100-l)/l)',
+lc: 'Metre scale: 1 mm',
+steps: [ 'Connect unknown resistance S in one arm.',
+'Connect known resistance R in adjacent arm.',
+'Adjust the jockey along the wire until galvanometer reads zero.',
+'Note balance length l from one end.',
+'S = R × (100 − l) / l (meter bridge formula).'
+]
+}
+},
+
+{ id: 'potentiometer',
+icon: '🎚️',
+title: 'Potentiometer',
+desc: 'Compare EMFs of two cells or find internal resistance of a cell.',
+info: { about: 'A potentiometer is a device for measuring EMF accurately without drawing any current from the cell. It works on the principle that voltage is proportional to wire length.',
+formula: 'E₁/E₂ = l₁/l₂  |  r = R(l₁-l₂)/l₂',
+lc: 'Metre scale: 1 mm',
+steps: [ 'Set up the potentiometer with a driver cell.',
+'Connect the first cell and find balance length l₁ (null deflection).',
+'Replace with second cell and find balance length l₂.',
+'E₁/E₂ = l₁/l₂ gives the ratio of EMFs.',
+'For internal resistance: use a shunt R and note balance lengths with/without.'
+]
+}
+}
+]
+}
+};
