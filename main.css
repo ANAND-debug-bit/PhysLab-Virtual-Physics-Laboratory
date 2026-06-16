@@ -1,3 +1,19 @@
+:root {
+  --bg3: #112240;
+  --border: #1e3a5f;
+  --border2: #2a4f7a;
+  --surface2: #162844;
+  --text-mute: #4a6580;
+  --text-dim: #8ba3c0;
+  --green: #2ee59d;
+  --green-dim: #1a8a5e;
+  --amber: #ffb347;
+  --cyan: #64dfdf;
+  --purple: #a855f7;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-head: 'Space Grotesk', sans-serif;
+}
+
 * { margin: 0;
     padding: 0;
     box-sizing: border-box; }
