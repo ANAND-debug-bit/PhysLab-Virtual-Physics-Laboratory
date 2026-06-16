@@ -57,7 +57,7 @@ len: 80,
 angle: Math.PI / 6,   
 angV: 0,              
 g: 9.8,               
-dt: 0.04};
+dt: 0.04 };
 
 // Draw a faint grid in the background
 function drawGrid() { ctx.strokeStyle = 'rgba(30,58,95,0.6)';
@@ -147,6 +147,116 @@ drawPendulum();
 drawVernier();
 t++; 
 requestAnimationFrame(frame); }
-frame(); 
-})();
+frame();  })();
 
+//domain and instrument modal
+// keeps track of any cleanup function from the currently open instrument
+let currentInstrumentCleanup = null;
+function openCategory(catId) { const cat = CATEGORIES[catId];
+if (!cat) return;
+const modal = document.getElementById('categoryModal');
+const content = document.getElementById('catModalContent');
+content.innerHTML = ` <div class="cat-modal-title">${cat.icon} ${cat.title}</div>
+<p class="cat-modal-desc">${cat.desc}</p>
+<div class="instruments-grid">
+${cat.instruments.map(instr => `
+<div class="instr-card" onclick="openInstrument('${instr.id}','${catId}')">
+<div class="instr-card-icon">${instr.icon}</div>
+<h4>${instr.title}</h4>
+<p>${instr.desc}</p>
+<span class="instr-card-btn">Open Instrument →</span>
+</div>
+`).join('')}
+</div>
+`;
+
+modal.classList.add('active'); }
+function closeCategoryModal(e) { if (e.target === document.getElementById('categoryModal')) closeCategoryModalBtn(); }
+
+function closeCategoryModalBtn() { document.getElementById('categoryModal').classList.remove('active'); }
+
+// to open up a specific instrument modal and renders its interactive canvas
+function openInstrument(instrId, catId) { const cat = CATEGORIES[catId];
+const instr = cat.instruments.find(i => i.id === instrId);
+if (!instr) return;
+if (currentInstrumentCleanup) { currentInstrumentCleanup();
+currentInstrumentCleanup = null; }
+
+const modal = document.getElementById('instrumentModal');
+const content = document.getElementById('instrModalContent');
+const stepsHtml = instr.info.steps.map(s => `<li>${s}</li>`).join('');
+
+// to render the instrument modal layout
+content.innerHTML = ` <div class="instr-modal-header">
+<div class="instr-modal-title">${instr.icon} ${instr.title}</div>
+<div class="instr-modal-sub">${cat.title}</div>
+</div>
+<div class="instr-layout">
+<div class="instr-canvas-wrap" id="instrCanvasWrap">
+<div class="canvas-hint" id="canvasHint">Drag to interact</div>
+</div>
+<div class="instr-controls" id="instrControls">
+<div class="reading-display" id="readingDisplay">
+<h5>📊 Live Reading</h5>
+<div id="readingRows"></div>
+</div>
+<div class="ctrl-panel" id="ctrlPanel">
+<h5>⚙ Controls</h5>
+<div class="ctrl-row" id="ctrlRow"></div>
+</div>
+<div class="info-panel">
+<h5>📚 Theory</h5>
+<p>${instr.info.about}</p>
+<div class="formula-box">${instr.info.formula}</div>
+<div class="lc-badge">
+<span class="lc-key">Least Count:</span>
+<span class="lc-val">${instr.info.lc}</span>
+</div>
+<ul class="info-steps">${stepsHtml}</ul>
+</div>
+</div>
+</div>`;
+
+modal.classList.add('active');
+const wrap = document.getElementById('instrCanvasWrap');
+const renderers = {
+// 01(measuremtn)
+    vernier:       window.mountVernier,
+    screwgauge:    window.mountScrewGauge,
+    spherometer:   window.mountSpherometer,
+// 02(mechanics1)
+    pendulum:      window.mountPendulum,
+    spring:        window.mountSpring,
+    inclined:      window.mountInclined,
+// 03(mechanics2)
+    youngmodulus:  window.mountYoungModulus,
+    stokes:        window.mountStokes,
+    surface:       window.mountSurface,
+// 04(waves & thermodynamics)
+    resonance:     window.mountResonance,
+    sonometer:     window.mountSonometer,
+    cooling:       window.mountCooling,
+// 05(ray & wave optics)
+    lens:          window.mountLens,
+    prism:         window.mountPrism,
+// 06(electrodynamics & magnetism)
+    ohm:           window.mountOhm,
+    wheatstone:    window.mountWheatstone,
+    potentiometer: window.mountPotentiometer, };
+
+const fn = renderers[instrId];
+if (fn) { currentInstrumentCleanup = fn(
+wrap, document.getElementById('readingRows'),
+document.getElementById('ctrlRow'), document.getElementById('canvasHint')); }
+else { wrap.innerHTML = ` <div style="display:flex;align-items:center;justify-content:center;height:320px; color:var(--text-mute);font-family:var(--font-mono);font-size:14px;">
+Have some patience bro…
+</div> `; }}
+
+function closeInstrumentModal(e) { if (e.target === document.getElementById('instrumentModal')) closeInstrumentModalBtn(); }
+function closeInstrumentModalBtn() { if (currentInstrumentCleanup) { currentInstrumentCleanup();
+currentInstrumentCleanup = null; }
+
+document.getElementById('instrumentModal').classList.remove('active'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeInstrumentModalBtn();
+closeCategoryModalBtn(); }
+});
