@@ -1,0 +1,210 @@
+.canvas-hint{position: absolute;
+bottom: 10px;
+left: 50%;
+transform: translateX(-50%);
+background: rgba(10,22,40,0.8);
+border: 1px solid var(--border2);
+border-radius: 20px;
+padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 14px;
+padding-right: 14px;
+font-size: 11px;
+color: var(--text-mute);
+pointer-events: none;
+white-space: nowrap;}
+
+.vernier-wrap{position: relative;}
+
+/* observation table to show measured records */
+.obs-table{width: 100%;
+border-collapse: collapse;
+margin-top: 10px;
+font-size: 12px;
+font-family: var(--font-mono);}
+
+.obs-table th{ background: var(--bg3);
+color: var(--text-mute);
+padding-top: 6px;
+padding-bottom: 6px;
+padding-left: 10px;
+padding-right: 10px;
+text-align: left;
+border: 1px solid var(--border);}
+
+.obs-table td {padding-top: 6px;
+padding-bottom: 6px;
+padding-left: 10px;
+padding-right: 10px;
+border: 1px solid var(--border);
+color: var(--text-dim);}
+
+/* make every second row lighter so it is easier to read  */
+
+.obs-table tr:nth-child(even) td{background: rgba(255, 255, 255, 0.02);}
+
+/* ....  */
+
+.toggle-wrap{ display: flex;
+align-items: center;
+gap: 10px;
+font-size: 13px;
+color: var(--text-dim);}
+
+.toggle-switch{position: relative;
+width: 40px;
+height: 22px;
+display: inline-block;}
+
+.toggle-switch input{display: none;}
+.toggle-slider{position: absolute; top: 0;
+right: 0; bottom: 0; left: 0;
+background: var(--surface2);
+border-radius: 22px;
+cursor: pointer;
+transition: background 0.2s ;
+border: 1px solid var(--border2);}
+
+/* the little round dot inside the slider */
+.toggle-slider::before { content: '';
+position: absolute;
+width: 16px;
+height: 16px;
+background: var(--text-mute);
+border-radius: 50%;
+top: 2px;
+left: 2px;
+transition: transform 0.2s, background 0.2s; }
+
+/* when the checkbox is checked, change the slider background to green */
+.toggle-switch input:checked + .toggle-slider { background: var(--green-dim);}
+
+/* and slide the dot to the right */
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px);
+background: var(--green); }
+
+
+.circuit-legend { display: flex;
+flex-wrap: wrap;
+gap: 10px;
+margin-top: 12px; }
+
+.legend-item { display: flex;
+align-items: center;
+gap: 6px;
+font-size: 12px;
+color: var(--text-dim); }
+
+.legend-color { width: 18px;
+height: 3px;
+border-radius: 2px; }
+
+
+/* wave animation (used on SVG paths) :) */
+@keyframes waveMove {
+from { stroke-dashoffset: 0; }
+to { stroke-dashoffset: -40; }
+}
+
+.wave-animated { animation: waveMove 1s linear infinite; }
+
+/* data display for the pendulum experiment */
+.pendulum-data { display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 10px;
+margin-top: 10px; }
+
+.pendulum-data-item { background: var(--bg3);
+border: 1px solid var(--border);
+border-radius: 8px;
+padding-top: 10px;
+padding-bottom: 10px;
+padding-left: 12px;
+padding-right: 12px; }
+
+/* the big number shown in each data card */
+.pendulum-data-item .val { font-family: var(--font-mono);
+font-size: 20px;
+font-weight: 700;
+color: var(--amber); }
+
+/* the small label under the number */
+.pendulum-data-item .lbl { font-size: 11px;
+color: var(--text-mute); margin-top: 2px; }
+
+.badge { display: inline-block;
+padding-top: 2px;
+padding-bottom: 2px;
+padding-left: 8px;
+padding-right: 8px;
+border-radius: 4px;
+font-size: 10px;
+font-weight: 700;
+letter-spacing: 0.08em;
+text-transform: uppercase; }
+
+.badge-green { background: rgba(46, 229, 157, 0.15); color: var(--green); }
+.badge-amber { background: rgba(255, 179, 71, 0.15); color: var(--amber); }
+.badge-cyan { background: rgba(100, 223, 223, 0.15); color: var(--cyan);}
+.badge-purple { background: rgba(168, 85, 247, 0.15); color: var(--purple);}
+
+/* ---- badge used to show error / LC (least count)values ---- */
+.lc-badge { display: inline-flex;
+align-items: center;
+gap: 6px;
+background: var(--bg3);
+border: 1px solid var(--border2);
+border-radius: 6px;
+padding-top: 6px;
+padding-bottom: 6px;
+padding-left: 12px;
+padding-right: 12px;
+font-family: var(--font-mono);
+font-size: 12px;
+margin-bottom: 4px; }
+
+.lc-badge .lc-key { color: var(--text-mute); }
+
+/* the value part (e.g. 0.02 mm ) */
+.lc-badge .lc-val { color: var(--cyan); font-weight: 600; }
+
+
+/* section that lets the user record and list observations */
+.obs-recorder { margin-top: 10px;}
+
+.obs-recorder button { width: 100%;
+padding-top: 9px;
+padding-bottom: 9px;
+background: transparent;
+border: 1px solid var(--border2);
+border-radius: 6px;
+color: var(--text-dim);
+font-size: 13px;
+cursor: pointer;
+font-family: var(--font-head);
+font-weight: 600;
+transition: all 0.2s;
+margin-bottom: 8px; }
+
+.obs-recorder button:hover { border-color: var(--green);
+color: var(--green); background: rgba(46, 229, 157, 0.05); }
+
+/* scrollable list of saved observations */
+.obs-list { max-height: 120px;
+overflow-y: auto;
+font-family: var(--font-mono);
+font-size: 11px;
+color: var(--text-dim); }
+
+.obs-list div { padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 8px;
+padding-right: 8px;
+border-bottom: 1px solid var(--border);
+display: flex;
+justify-content: space-between; }
+
+.obs-list div:last-child { border-bottom: none; }
+
+/* on small screens make the canvas shorter so it fits*/
+@media (max-width: 700px) { .instr-canvas-wrap canvas { max-height: 260px; } }
