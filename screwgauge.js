@@ -18,7 +18,7 @@ var divisionsOnThimble = 50;
 var leastCount = pitch / divisionsOnThimble; 
 var startingGapMM = 5;  
 
-  // pitch Scale Reading: the last 0.5 mm mark we have passed on the main scale
+// pitch Scale Reading: the last 0.5 mm mark we have passed on the main scale
 function calculatePitchScaleReading() { var distanceMovedSoFar = numberOfTurns * pitch;
 var lastHalfMmMark = Math.floor(distanceMovedSoFar / pitch) * pitch;
 return lastHalfMmMark; }
@@ -29,7 +29,7 @@ return lineNumber % divisionsOnThimble; }
 
 function calculateCurrentGap() { return startingGapMM + numberOfTurns * pitch; }
 
-  ctrlEl.innerHTML = '<div class="ctrl-mode-btns">' +
+ctrlEl.innerHTML = '<div class="ctrl-mode-btns">' +
 '<button class="mode-btn active" id="sgMode1" onclick="sgSetMode(\'drag\')">🖱 Rotate Thimble</button>' + '<button class="mode-btn" id="sgMode2" onclick="sgSetMode(\'type\')">⌨ Type Values</button>' +
 '</div>' +
 '<div id="sgDragHint" style="font-size:12px;color:var(--text-mute);margin-bottom:8px;">Drag thimble up/down to rotate</div>' +
@@ -60,22 +60,18 @@ else { hintEl.textContent = 'Enter PSR and HSR values'; } };
 
 var typedPSR = 2.5;
 var typedHSR = 18;
-
 window.sgFromType = function () { var psrInput = document.getElementById('sgPSR').value;
 var hsrInput = document.getElementById('sgHSR').value;
 
 typedPSR = parseFloat(psrInput);
 if (isNaN(typedPSR)) { typedPSR = 0; }
-
 typedHSR = parseInt(hsrInput);
 if (isNaN(typedHSR)) { typedHSR = 0; }
-
 drawEverything();
 };
 
 // recording observations
 var howManyObservationsSoFar = 0;
-
 window.sgRecord = function () {
 howManyObservationsSoFar = howManyObservationsSoFar + 1;
 var listElement = document.getElementById('sgObsList');
@@ -86,7 +82,6 @@ var newRow = document.createElement('div');
 newRow.innerHTML =
 '<span>#' + howManyObservationsSoFar + ' PSR=' + psrToShow + ' HSR=' + hsrToShow + '</span>' +
 '<span>' + finalReading + 'mm</span>';
-
 listElement.appendChild(newRow);
 listElement.scrollTop = listElement.scrollHeight;
 };
@@ -95,7 +90,7 @@ var frameY = 130;
 var barrelX = 310;     
 function drawEverything() {
 ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-ctx.fillStyle = '#0d1E35';
+ctx.fillStyle = '#0d1e35';
 ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 var psr = (currentMode === 'type') ? typedPSR : calculatePitchScaleReading();
 var hsr = (currentMode === 'type') ? typedHSR : calculateHeadScaleReading();
@@ -111,16 +106,13 @@ ctx.font = '11px JetBrains Mono';
 ctx.fillText('Pitch = 0.5 mm | LC = 0.01 mm | Divisions = 50', 20, 38);
 
 // u shape frame
-ctx.strokeStyle = '#2A4F7A';
+ctx.strokeStyle = '#2a4f7a';
 ctx.lineWidth = 3;
 ctx.fillStyle = '#162844';
-
 ctx.fillRect(60, frameY + 20, 520, 22);
 ctx.strokeRect(60, frameY + 20, 520, 22);
-
 ctx.fillRect(60, frameY - 80, 22, 120);
 ctx.strokeRect(60, frameY - 80, 22, 120);
-
 ctx.fillStyle = '#1c3355';
 ctx.strokeStyle = '#64dfdf';
 ctx.fillRect(82, frameY - 50, 30, 90);
@@ -134,7 +126,6 @@ ctx.strokeStyle = '#2a4f7a';
 ctx.lineWidth = 1.5;
 ctx.fillRect(barrelX, frameY - 30, 200, 60);
 ctx.strokeRect(barrelX, frameY - 30, 200, 60);
-
 ctx.strokeStyle = '#4a6580';
 ctx.lineWidth = 1;
 ctx.beginPath();
@@ -145,14 +136,11 @@ ctx.stroke();
 for (var i = 0; i <= 16; i++) {
 var tickX = barrelX + i * 13;
 if (tickX > barrelX + 195) { break; }
-
 var isHalfMarkOnly = (i % 2 !== 0); 
 var tickHeight = isHalfMarkOnly ? 6 : 11;
 var tickY = isHalfMarkOnly ? (frameY + 2) : (frameY - tickHeight);
-
 ctx.fillStyle = isHalfMarkOnly ? '#4a6580' : '#64dfdf';
 ctx.fillRect(tickX, tickY, 1.5, tickHeight);
-
 if (!isHalfMarkOnly) { ctx.fillStyle = '#8ba3c0';
 ctx.font = '9px JetBrains Mono';
 ctx.textAlign = 'center';
@@ -160,16 +148,130 @@ ctx.fillText(i * 0.5, tickX, frameY - 14);
 } }
 ctx.textAlign = 'left';
 
+// draw the thimble (the rotating part with HSR marks) 
+var thimblePixelGuess;
+if (currentMode === 'type') { thimblePixelGuess = barrelX + (psr / (pitch * 16)) * 195 - 50; } 
+else { thimblePixelGuess = barrelX + (numberOfTurns / 16) * 195 - 40; }
+var thimbleX = Math.max(barrelX + 20, Math.min(barrelX + 150, thimblePixelGuess));
+ctx.fillStyle = '#233d5c';
+ctx.strokeStyle = '#2ee59d';
+ctx.lineWidth = 2;
+ctx.fillRect(thimbleX, frameY - 42, 55, 84);
+ctx.strokeRect(thimbleX, frameY - 42, 55, 84);
 
+var rotationToUse = (currentMode === 'type') ? (typedHSR / divisionsOnThimble) * 360 : thimbleAngleDegrees;
+for (var lineIndex = 0; lineIndex < divisionsOnThimble; lineIndex++) {
+var fractionAround = ((lineIndex + rotationToUse / (360 / divisionsOnThimble)) % divisionsOnThimble) / divisionsOnThimble;
+var lineY = frameY - 40 + fractionAround * 80;
+var isBigLine = (lineIndex % 5 === 0); 
+var lineLength = isBigLine ? 12 : 7;
+var isThisTheCurrentHSR = (lineIndex === hsr);
 
-}}
-    
+if (isThisTheCurrentHSR) { ctx.fillStyle = '#ffb347'; }
+else if (isBigLine) { ctx.fillStyle = '#2ee59d'; }
+else { ctx.fillStyle = '#2a4f7a'; }
+ctx.fillRect(thimbleX + 55 - lineLength, lineY, lineLength, 1.5);
+if (isBigLine) { ctx.fillStyle = isThisTheCurrentHSR ? '#ffb347' : '#8ba3c0';
+ctx.font = '9px JetBrains Mono';
+ctx.textAlign = 'right';
+ctx.fillText(lineIndex, thimbleX - 4, lineY + 4);
+} }
+ctx.textAlign = 'left';
+ctx.strokeStyle = '#ffb347';
+ctx.lineWidth = 1.5;
+ctx.beginPath();
+ctx.moveTo(thimbleX - 10, frameY);
+ctx.lineTo(thimbleX, frameY);
+ctx.stroke();
+ctx.fillStyle = '#ffb347';
+ctx.font = 'bold 10px JetBrains Mono';
+ctx.fillText('←ref', thimbleX - 45, frameY - 3);
 
+// draw the spindle (the moving/rotating rod that closes the gap)
+var rightEdgeOfSpindle = thimbleX - 5;
+ctx.fillStyle = '#1c3355';
+ctx.strokeStyle = '#2a4f7A';
+ctx.fillRect(112, frameY-6,rightEdgeOfSpindle-112,12);
+ctx.strokeRect(112, frameY-6, rightEdgeOfSpindle-112,12);
 
+ctx.fillStyle = '#64dfdf';
+ctx.font = '9px JetBrains Mono';
+ctx.fillText('SPINDLE', 140,frameY+22);
+var gapStartX = 112;
+var gapEndX = Math.max(115, gapStartX + gapInPixels * 0.6);
 
+ctx.strokeStyle = 'rgba(100,223,223,0.3)';
+ctx.lineWidth = 1;
+ctx.setLineDash([4,3]);
+ctx.beginPath();
+ctx.moveTo(gapStartX, frameY-20);
+ctx.lineTo(gapStartX, frameY-40);
+ctx.stroke();
 
+ctx.beginPath();
+ctx.moveTo(gapEndX, frameY-20);
+ctx.lineTo(gapEndX, frameY-40);
+ctx.stroke();
+ctx.beginPath();
+ctx.moveTo(gapStartX, frameY-35);
+ctx.lineTo(gapEndX, frameY-35);
+ctx.stroke();
+ctx.setLineDash([]); 
 
+ctx.fillStyle = '#64dfdf';
+ctx.font = '10px JetBrains Mono';
+ctx.textAlign = 'center';
+ctx.fillText(finalReading.toFixed(2) + ' mm', (gapStartX + gapEndX) / 2, frameY-48);
+ctx.textAlign = 'left';
 
+ctx.fillStyle = '#112240';
+ctx.strokeStyle = '#2ee59d';
+ctx.lineWidth = 1.5;
+window._roundRect(ctx, 20, canvasHeight - 72, canvasWidth - 40, 58, 8);
+ctx.fill();
+ctx.stroke();
 
+ctx.fillStyle = '#2ee59d';
+ctx.font = '11px JetBrains Mono';
+ctx.fillText('Reading  =  PSR  +  (HSR × LC)', 36, canvasHeight - 52);
+ctx.fillText('=  ' + psr.toFixed(2) + '  +  (' + hsr + ' × ' + leastCount + ')', 36, canvasHeight - 36);
 
+ctx.fillStyle = '#ffb347';
+ctx.font = 'bold 16px JetBrains Mono';
+ctx.fillText(' =  ' + finalReading.toFixed(2) + ' mm', 36, canvasHeight - 17);
 
+setReadings(readingEl, [ ['PSR', psr.toFixed(2), 'mm'],
+['HSR', hsr, 'div'],
+['LC', leastCount.toFixed(2), 'mm'],
+['Reading', finalReading.toFixed(2), 'mm'],
+]);
+}
+
+var dragStartY = 0;
+var rotationsWhenDragStarted = 0;
+
+canvas.addEventListener('mousedown', function (event) { if (currentMode !== 'drag') { return; }
+var canvasBox = canvas.getBoundingClientRect(); isDragging = true;
+dragStartY = (event.clientY - canvasBox.top) * (canvasHeight / canvasBox.height);
+rotationsWhenDragStarted = numberOfTurns;
+
+canvas.style.cursor = 'ns-resize'; });
+canvas.addEventListener('mousemove', function (event) { if (!isDragging) { return; }
+var canvasBox = canvas.getBoundingClientRect();
+var mouseY = (event.clientY - canvasBox.top) * (canvasHeight / canvasBox.height);
+var howFarMovedInTurns = (dragStartY - mouseY) / 30;
+numberOfTurns = Math.max(0, Math.min(14, rotationsWhenDragStarted + howFarMovedInTurns));
+thimbleAngleDegrees = (numberOfTurns % 1) * 360;
+drawEverything();
+});
+
+canvas.addEventListener('mouseup', function () { isDragging = false;
+canvas.style.cursor = 'ns-resize';
+});
+
+canvas.addEventListener('mouseleave', function () { isDragging = false; });
+canvas.style.cursor = 'ns-resize';
+hintEl.textContent = 'Drag up/down to rotate the thimble';
+drawEverything();
+return function cleanup() {};
+};
