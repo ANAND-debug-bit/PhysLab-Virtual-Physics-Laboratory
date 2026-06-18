@@ -69,8 +69,7 @@ var legs = [];
 for (var i = 0; i < legAngles.length; i++) { var angleInRadians = legAngles[i] * Math.PI / 180;
 var legX = cx + legRadius * Math.cos(angleInRadians);
 var legY = cy + legRadius * 0.4 * Math.sin(angleInRadians);
-legs.push({ x: legX, y: legY });
-}
+legs.push({ x: legX, y: legY }); }
  
     
 ctx.fillStyle = '#1c3355';
@@ -78,14 +77,12 @@ ctx.strokeStyle = '#2a4f7a';
 ctx.lineWidth = 1.5;
 ctx.beginPath();
 for (var j = 0; j < legs.length; j++) { if (j === 0) { ctx.moveTo(legs[j].x, legs[j].y); }
-else { ctx.lineTo(legs[j].x, legs[j].y); }
-}
+else { ctx.lineTo(legs[j].x, legs[j].y); } }
 ctx.closePath();
 ctx.fill();
 ctx.stroke();
 for (var k = 0; k < legs.length; k++) { ctx.fillStyle = '#2ee59d'; ctx.beginPath();
-ctx.arc(legs[k].x, legs[k].y, 5, 0, Math.PI * 2); ctx.fill();
-}
+ctx.arc(legs[k].x, legs[k].y, 5, 0, Math.PI * 2); ctx.fill(); }
  
 var screwTop = cy - h * scale * 4;
 ctx.strokeStyle = '#ffb347';
@@ -112,3 +109,37 @@ ctx.setLineDash([]);
 ctx.fillStyle = '#ff6b6b';
 ctx.font = 'bold 11px JetBrains Mono';
 ctx.fillText('h=' + h.toFixed(2) + 'mm', cx + 20, cy + (h * scale) / 2 + 4);
+
+ctx.strokeStyle = '#a855f7'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+ctx.beginPath(); ctx.moveTo(legs[0].x, legs[0].y + 15); ctx.lineTo(legs[1].x, legs[1].y + 15); 
+ctx.stroke();
+ctx.setLineDash([]);
+ctx.fillStyle = '#a855f7'; ctx.font = '11px JetBrains Mono';
+ctx.textAlign = 'center';
+ctx.fillText('l=' + l.toFixed(1) + 'mm', (legs[0].x + legs[1].x) / 2, legs[0].y + 28);
+ctx.textAlign = 'left';
+ 
+ctx.strokeStyle = 'rgba(100,223,223,0.3)'; ctx.lineWidth = 1;
+ctx.beginPath(); ctx.moveTo(cx, cy + Rpx - h * scale); ctx.lineTo(cx + chordWidth / 2, legs[0].y); ctx.stroke();
+ctx.fillStyle = '#64dfdf'; ctx.font = '11px JetBrains Mono';
+ctx.fillText('R = ' + R.toFixed(1) + ' mm', cx + 30, cy + Rpx / 2 - h * scale - 20);
+ 
+ctx.fillStyle = '#112240'; ctx.strokeStyle = '#2ee59d'; ctx.lineWidth = 1.5;
+window._roundRect(ctx, 20, canvasHeight - 68, canvasWidth - 40, 54, 8);
+ctx.fill(); ctx.stroke();
+ctx.fillStyle = '#2EE59D'; ctx.font = '11px JetBrains Mono';
+ctx.fillText('R = l²/(6h) + h/2 = ' + l + '²/(6×' + h.toFixed(2) + ') + ' + h.toFixed(2) + '/2', 36, canvasHeight - 47);
+
+ctx.fillStyle = '#ffb347'; ctx.font = 'bold 16px JetBrains Mono';
+ctx.fillText('R = ' + R.toFixed(2) + ' mm = ' + (R / 10).toFixed(3) + ' cm', 36, canvasHeight - 22);
+ 
+setReadings(readingEl, [ ['Sagitta h', h.toFixed(2), 'mm'],
+['Leg dist l', l.toFixed(1), 'mm'], ['l²/6h', (l * l / (6 * h)).toFixed(2), 'mm'],
+['R', R.toFixed(2), 'mm'], ]); }
+ 
+render();
+hintEl.textContent = 'Adjust sliders to change sagitta (h) and leg distance (l)';
+return function () {}; };
+
+
+
