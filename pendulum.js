@@ -129,6 +129,118 @@ ctx.strokeRect(pivotX - 40, 30, 80, 20);
 for (let i = -3; i <= 3; i++) { ctx.fillStyle = '#2a4f7a';
 ctx.fillRect(pivotX + i * 12 - 3, 22, 6, 12); }
 
-} }
 
+//drawing the arc showing how wide the pendulum swings
+ctx.strokeStyle = 'rgba(100,223,223,0.3)';
+ctx.lineWidth   = 1;
+ctx.beginPath();
+ctx.arc(pivotX, pivotY, 45, Math.PI / 2 - 0.01, Math.PI / 2 + Math.abs(angle), angle < 0);
+ctx.stroke();
+ctx.fillStyle = '#64dfdf';
+ctx.font      = '11px JetBrains Mono';
+ctx.fillText(`${Math.abs(angle * 180 / Math.PI).toFixed(1)}°`, pivotX + 10, pivotY + 50);
+ 
+// drawing the string from the pivot point to the metal ball/bob
+ctx.strokeStyle = '#8ba3c0';
+ctx.lineWidth   = 1.5;
+ctx.beginPath();
+ctx.moveTo(pivotX, pivotY);
+ctx.lineTo(bobX, bobY);
+ctx.stroke();
+ 
+ctx.strokeStyle = 'rgba(46,229,157,0.3)';
+ctx.lineWidth   = 1;
+ctx.setLineDash([4, 3]); 
+ctx.beginPath();
+ctx.moveTo(pivotX + 20, pivotY);
+ctx.lineTo(pivotX + 20, bobY);
+ctx.stroke();
+ctx.setLineDash([]); 
+ctx.fillStyle = '#2ee59d';
+ctx.font      = '11px JetBrains Mono';
+ctx.fillText(`L = ${length.toFixed(2)} m`, pivotX + 26, (pivotY + bobY) / 2 + 4);
+ 
+ctx.fillStyle = '#8ba3c0';
+ctx.beginPath();
+ctx.arc(pivotX, pivotY, 5, 0, Math.PI * 2);
+ctx.fill();
+ 
+// drawing the metal ball with a shiny gold gradient 
+ctx.beginPath();
+ctx.arc(bobX, bobY, 18, 0, Math.PI * 2);
+const grad = ctx.createRadialGradient(bobX - 4, bobY - 4, 2, bobX, bobY, 18);
+grad.addColorStop(0, '#ffd47a'); 
+grad.addColorStop(1, '#a06a1a');
+ctx.fillStyle   = grad;
+ctx.fill();
+ctx.strokeStyle = '#ffb347';
+ctx.lineWidth   = 1.5;
+ctx.stroke();
+ 
+ctx.strokeStyle = 'rgba(255,107,107,0.2)';
+ctx.lineWidth   = 1;
+ctx.setLineDash([4, 4]);
+ctx.beginPath();
+ctx.moveTo(pivotX, pivotY);
+ctx.lineTo(pivotX, pivotY + length * pxPerMeter + 30);
+ctx.stroke();
+ctx.setLineDash([]); 
+ 
+const T = theoreticalT();
+const calcG = (4 * Math.PI * Math.PI * length) / (T * T);
+ 
+ctx.fillStyle   = '#112240';
+ctx.strokeStyle = '#2ee59d';
+ctx.lineWidth   = 1.5;
+window._roundRect(ctx, 20, H - 72, W - 40, 58, 8); 
+ctx.fill();
+ctx.stroke();
+ 
+ctx.fillStyle = '#2ee59d';
+ctx.font      = '11px JetBrains Mono';
+ctx.fillText(`T (theoretical) = 2π√(${length.toFixed(2)}/${g}) = ${T.toFixed(3)} s`, 36, H - 50);
+ctx.fillText(`g = 4π²L/T² = 4π²×${length.toFixed(2)}/${(T * T).toFixed(3)} = ${calcG.toFixed(3)} m/s²`, 36, H - 32);
+ 
+if (timing && oscCount > 0) { ctx.fillStyle = '#ffb347';
+ctx.font      = 'bold 12px JetBrains Mono';
+ctx.fillText(`Oscillations counted: ${oscCount}/10`, W - 260, H - 45); }
+ 
+setReadings(readingEl, [ ['Length L', length.toFixed(2), 'm'],
+['Period T', T.toFixed(3),'s'], ['g (calc)', calcG.toFixed(3),  'm/s²'],
+['Amplitude', amplitude,'°'],
+]);
+}
+ 
+// now it's time for the animation  loop
+// it will run every frame (60 times per second) to update and redraw the pendulum
+let animId;
+function loop() {
+if (running) {
+//pendulum's angular acceleration = -(g / L) × sin(angle)
+// this is actually the real physics formula for a simple pendulum
+angVel += (-g / length) * Math.sin(angle) * dt;
+angVel *= 0.9998;
+const prevSign = Math.sign(angle);
+angle += angVel;
+time  += dt;
+ 
+// count oscillations (an oscillation completes each time the pendulum crosses from the right side)
 
+if (timing && prevSign > 0 && Math.sign(angle) <= 0) {
+oscCount++;
+ 
+if (oscCount === 1) oscStart = time;
+ document.getElementById('pendTimeStatus').textContent = `⏱ Counting... (${oscCount}/10)`;
+ if (oscCount >= 10) { measuredT = (time - oscStart) / 9; 
+timing    = false; document.getElementById('pendTimeStatus').textContent = `✅ T (measured) = ${measuredT.toFixed(3)} s`;
+} } }
+ 
+render();
+animId = requestAnimationFrame(loop);
+}
+loop();
+hintEl.textContent = 'Adjust length & amplitude with sliders';
+return () => cancelAnimationFrame(animId);
+};
+
+ 
