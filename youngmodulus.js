@@ -74,10 +74,10 @@ const extension = calculateExtension();
 if (extension === 0) return Infinity; 
 return (force * wireLength) / (area * extension); }
 
-const wireTopY    = 70;   
+const wireTopY = 70;   
 const wireBottomY = 280; 
-const wire1X       = 250; 
-const wire2X       = 460;
+const wire1X = 250; 
+const wire2X = 460;
 
 //main drawing fn to draw the entire experiment on the canvas
 function render() { ctx.clearRect(0, 0, WIDTH, HEIGHT);
@@ -102,7 +102,7 @@ ctx.moveTo(wire1X - 75 + i * 45, wireTopY - 20);
 ctx.lineTo(wire1X - 85 + i * 45, wireTopY - 30);
 ctx.stroke();}
 
-const extension   = calculateExtension();             // real stretch, in meters (tiny! ofc)
+const extension   = calculateExtension(); // real stretch, in meters (tiny! ofc)
 const extensionPx = Math.min(extension * 50000, 50);  // scaled up hugely so it's visible on screen
 
 // drawing the reference wire 
@@ -161,9 +161,9 @@ ctx.textAlign = 'left';
 const micrometerX = wire2X + 20;
 const micrometerY = wireBottomY - 40;
 
-ctx.fillStyle   = '#162844';
+ctx.fillStyle = '#162844';
 ctx.strokeStyle = '#2ee59d';
-ctx.lineWidth   = 1.5;
+ctx.lineWidth = 1.5;
 ctx.fillRect(micrometerX, micrometerY, 60, 80);
 ctx.strokeRect(micrometerX, micrometerY, 60, 80);
 
@@ -174,17 +174,114 @@ ctx.fillText('Micro-', micrometerX + 30, micrometerY + 38);
 ctx.fillText('meter', micrometerX + 30, micrometerY + 50);
 ctx.textAlign = 'left';
 
-if (extensionPx > 2) { ctx.strokeStyle = '#ff6B6b';
+if (extensionPx > 2) { ctx.strokeStyle = '#ff6b6b';
 ctx.lineWidth = 1;
-ctx.setLineDash([3, 3]); 
+ctx.setLineDash([3,3]); 
 ctx.beginPath();
 ctx.moveTo(wire2X + 10, wireBottomY);
 ctx.lineTo(wire2X + 10, wireBottomY + extensionPx);
 ctx.stroke();
 ctx.setLineDash([]); 
-ctx.fillStyle = '#ff6b6b';
+ctx.fillStyle = '#FF6B6B';
 ctx.font = '10px JetBrains Mono';
 ctx.fillText(`ΔL=${(extension * 1000).toFixed(3)}mm`, wire2X + 14, wireBottomY + extensionPx / 2 + 4);
 }
 
-  
+ctx.strokeStyle = 'rgba(46,229,157,0.3)';
+ctx.lineWidth = 1;
+ctx.setLineDash([3, 3]);
+ctx.beginPath();
+ctx.moveTo(wire1X - 30, wireTopY);
+ctx.lineTo(wire1X - 30, wireBottomY);
+ctx.stroke();
+ctx.setLineDash([]);
+
+ctx.fillStyle = '#2ee59d';
+ctx.font = '10px JetBrains Mono';
+ctx.fillText(`L=${wireLength}m`, wire1X - 80, (wireTopY + wireBottomY) / 2 + 4);
+
+// drawing the hanging mass
+if (loadMass > 0) { const panY = wireBottomY + extensionPx;
+ctx.fillStyle = '#1c3355';
+ctx.strokeStyle = '#ffb347';
+ctx.lineWidth = 2;
+ctx.fillRect(wire2X - 25, panY + 5, 50, 35);
+ctx.strokeRect(wire2X - 25, panY + 5, 50, 35);
+
+ctx.fillStyle = '#ffb347';
+ctx.font = 'bold 11px JetBrains Mono';
+ctx.textAlign = 'center';
+ctx.fillText(loadMass + 'kg', wire2X, panY + 27);
+ctx.textAlign = 'left';
+
+ctx.strokeStyle = '#8BA3C0';
+ctx.lineWidth = 1.5;
+ctx.beginPath();
+ctx.moveTo(wire2X, wireBottomY + extensionPx);
+ctx.lineTo(wire2X, panY + 5);
+ctx.stroke();
+}
+
+// info box for calculations
+const youngsModulus = calculateYoungsModulus();
+const force = loadMass * GRAVITY;
+const radiusInMeters = wireRadius / 1000;
+const area = Math.PI * radiusInMeters ** 2;
+const stress = force / area;
+const strain = extension / wireLength;
+const panelX = 560, panelY = 60;
+
+ctx.fillStyle = '#112240';
+ctx.strokeStyle = '#2a4f7a';
+ctx.lineWidth = 1;
+ctx.fillRect(panelX, panelY, 160, 200);
+ctx.strokeRect(panelX, panelY, 160, 200);
+
+ctx.fillStyle = '#2ee59d';
+ctx.font = 'bold 11px JetBrains Mono';
+ctx.fillText('CALCULATIONS', panelX + 10, panelY + 18);
+
+const calculationRows = [ ['r',       `${wireRadius}mm`],
+['A=πr²',`${(area * 1e6).toFixed(4)} mm²`],
+['F=mg', `${force.toFixed(2)} N`],
+['Stress',`${(stress / 1e6).toFixed(1)} MPa`],
+['Strain',`${strain.toExponential(2)}`],
+['Y', `${(youngsModulus / 1e9).toFixed(1)} GPa`],
+];
+
+calculationRows.forEach(function([label, value], index) {
+const rowY = panelY + 40 + index * 26;
+
+ctx.fillStyle = '#4a6580';
+ctx.font= '10px JetBrains Mono';
+ctx.fillText(label, panelX + 10, rowY);
+ctx.fillStyle = '#ffb347';
+ctx.fillText(value, panelX + 60, rowY);
+});
+
+// bottom status bar to show the full formula worked out with real numbers and final result
+ctx.fillStyle = '#112240';
+ctx.strokeStyle = '#2ee59d';
+ctx.lineWidth = 1.5;
+window._roundRect(ctx, 20, HEIGHT - 72, 520, 58, 8);
+ctx.fill();
+ctx.stroke();
+
+ctx.fillStyle = '#2ee59d';
+ctx.font = '11px JetBrains Mono';
+ctx.fillText( `Y = FL/(πr²·ΔL) = ${force.toFixed(1)}×${wireLength}/(π×${wireRadius / 1000}²×${extension.toExponential(2)})`, 36, HEIGHT - 50 );
+
+ctx.fillStyle = '#ffb347';
+ctx.font = 'bold 14px JetBrains Mono';
+ctx.fillText( `Y = ${(youngsModulus / 1e9).toFixed(2)} GPa  (Steel ≈ 200 GPa)`, 36, HEIGHT - 28 );
+
+setReadings(readingEl, [ ['Length L',wireLength.toFixed(2),'m'],
+['Radius r',wireRadius.toFixed(2), 'mm'],
+['ΔL', (extension * 1000).toFixed(4), 'mm'],
+["Young's Y",  (youngsModulus / 1e9).toFixed(2), 'GPa'],
+]); }
+
+render();
+hintEl.textContent = 'Adjust wire dimensions and load to see extension';
+return () => {};
+};
