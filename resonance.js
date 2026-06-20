@@ -219,7 +219,7 @@ ctx.fillStyle = '#2ee59d';
 ctx.beginPath();
 ctx.arc(TUBE_LEFT - 14, waterTopY, 8, 0, Math.PI * 2);
 ctx.fill();
-ctx.fillStyle = '#0A1628';
+ctx.fillStyle = '#0a1628';
 ctx.font = 'bold 10px JetBrains Mono';
 ctx.textAlign = 'center';
 ctx.fillText('↕', TUBE_LEFT - 14, waterTopY + 4);
@@ -265,7 +265,7 @@ ctx.moveTo(TUBE_LEFT - 40, y2);
 ctx.lineTo(TUBE_LEFT + TUBE_WIDTH, y2);
 ctx.stroke();
 ctx.setLineDash([]);
-ctx.fillStyle = '#A855F7';
+ctx.fillStyle = '#a855f7';
 ctx.font = 'bold 10px JetBrains Mono';
 ctx.textAlign = 'right';
 ctx.fillText(`L₂=${(l2 * 100).toFixed(1)}cm`, TUBE_LEFT - 44, y2 + 4);
@@ -294,5 +294,161 @@ if (i === 0) ctx.moveTo(tubeCentreX + displacement, y);
 else ctx.lineTo(tubeCentreX + displacement, y);
 }
 ctx.stroke(); }
+
+function drawResonanceAlert(atResonance) { if (!atResonance || !isForkRinging) return;
+ 
+// cyan highlight blinking/pulse at resonance condition
+const pulseAlpha = 0.4 + 0.3 * Math.sin(animTime * 8);
+ctx.fillStyle = `rgba(46,229,157,${pulseAlpha})`;
+ctx.fillRect(TUBE_LEFT + 2, TUBE_TOP, TUBE_WIDTH - 4, TUBE_HEIGHT_PX);
+ 
+ctx.fillStyle = '#2ee59d';
+ctx.font = 'bold 13px JetBrains Mono';
+ctx.textAlign = 'center';
+ctx.fillText('RESONANCE!', TUBE_LEFT + TUBE_WIDTH / 2, TUBE_TOP - 10);
+ctx.textAlign = 'left'; }
+ 
+function drawTuningFork() { const forkX = TUBE_LEFT + TUBE_WIDTH / 2;
+const forkY = TUBE_TOP - 30;   
+ 
+ctx.strokeStyle = '#ffb347';
+ctx.lineWidth = 2;
+ctx.beginPath();
+ctx.moveTo(forkX, forkY + 20);
+ctx.lineTo(forkX, forkY + 40);
+ctx.stroke();
+ 
+// base of prong (y split)
+ctx.beginPath();
+ctx.moveTo(forkX, forkY + 20);
+ctx.lineTo(forkX - 10, forkY + 5);
+ctx.stroke();
+ctx.beginPath();
+ctx.moveTo(forkX, forkY + 20);
+ctx.lineTo(forkX + 10, forkY + 5);
+ctx.stroke();
+ 
+// tips of the prong
+ctx.beginPath();
+ctx.moveTo(forkX - 10, forkY + 5);
+ctx.lineTo(forkX - 14, forkY - 10);
+ctx.stroke();
+ctx.beginPath();
+ctx.moveTo(forkX + 10, forkY + 5);
+ctx.lineTo(forkX + 14, forkY - 10);
+ctx.stroke();
+ 
+if (isForkRinging) { const vibration = Math.sin(animTime * frequency * 0.2) * 4;
+ctx.strokeStyle = 'rgba(255,179,71,0.4)';
+ctx.lineWidth = 1;
+ctx.beginPath();
+ctx.moveTo(forkX - 14 + vibration, forkY - 10);
+ctx.lineTo(forkX - 20 + vibration, forkY - 10);
+ctx.stroke();
+ctx.beginPath();
+ctx.moveTo(forkX + 14 - vibration, forkY - 10);
+ctx.lineTo(forkX + 20 - vibration, forkY - 10);
+ctx.stroke(); }
+ 
+ctx.fillStyle = '#ffb347';
+ctx.font = 'bold 10px JetBrains Mono';
+ctx.textAlign = 'center';
+ctx.fillText(frequency + ' Hz', forkX, forkY - 18);
+ctx.textAlign = 'left'; }
+ 
+function drawInfoPanel(airColumnM, l1, l2, speed, atResonance) { const panelX = TUBE_LEFT + TUBE_WIDTH + 100;
+const panelY = 60;
+ 
+ctx.fillStyle = '#112240';
+ctx.strokeStyle = '#1e3a5f';
+ctx.lineWidth = 1.5;
+window._roundRect(ctx, panelX, panelY, 260, 220, 8);
+ctx.fill();
+ctx.stroke();
+ctx.fillStyle = '#2ee59d';
+ctx.font = 'bold 12px JetBrains Mono';
+ctx.fillText('READINGS', panelX + 14, panelY + 22);
+ 
+const rows = [
+['Frequency f',frequency + ' Hz', '#64dfdf'],
+['Air column L',   (airColumnM * 100).toFixed(1) + ' cm','#ffb347'],
+['L₁ (1st res.)',  l1 > 0 ? (l1 * 100).toFixed(1) + ' cm' : 'N/A', '#ffb347'],
+['L₂ (2nd res.)',  (l2 > 0 && l2 < 1) ? (l2 * 100).toFixed(1) + ' cm' : 'N/A', '#a855f7'],
+['v = 2f(L₂-L₁)', (l2 > 0 && l2 < 1) ? speed.toFixed(1) + ' m/s' : '—', '#2ee59d'],
+];
+ 
+rows.forEach(([label, value, colour], i) => { const rowY = panelY + 44 + i * 34;
+ctx.fillStyle = '#4a6580';
+ctx.font = '10px JetBrains Mono';
+ctx.fillText(label, panelX + 14, rowY);
+ctx.fillStyle = colour;
+ctx.font = 'bold 13px JetBrains Mono';
+ctx.fillText(value, panelX + 14, rowY + 16); });
+ 
+// status badge at the bottom of panel
+const badgeY = panelY + 210;
+ctx.fillStyle = atResonance ? 'rgba(46,229,157,0.2)' : 'rgba(74,101,128,0.15)';
+ctx.strokeStyle = atResonance ? '#2EE59D' : '#4A6580';
+ctx.lineWidth = 1;
+window._roundRect(ctx, panelX + 14, badgeY, 232, 28, 6);
+ctx.fill();
+ctx.stroke();
+ctx.fillStyle = atResonance ? '#2EE59D' : '#4A6580';
+ctx.font = 'bold 11px JetBrains Mono';
+ctx.textAlign = 'center';
+ctx.fillText( atResonance ? '✓ AT RESONANCE' : 'Adjust water level to resonance',
+panelX + 14 + 116, badgeY + 18 );
+ctx.textAlign = 'left'; }
+ 
+function drawFormulaBar(l2, speed) { ctx.fillStyle = '#112240';
+ctx.strokeStyle = '#2ee59d';
+ctx.lineWidth = 1.5;
+window._roundRect(ctx, 20, HEIGHT - 44, WIDTH - 40, 30, 8);
+ctx.fill();
+ctx.stroke();
+ctx.fillStyle = '#2ee59d';
+ctx.font = '11px JetBrains Mono';
+const speedText = (l2 > 0 && l2 < 1) ? speed.toFixed(1) : '—';
+ctx.fillText(`λ/4 = L₁ + e  |  3λ/4 = L₂ + e  |  v = 2f(L₂ − L₁) = ${speedText} m/s`, 36, HEIGHT - 24);
+}
+ 
+canvas.addEventListener('mousedown', e => { const rect = canvas.getBoundingClientRect();
+const mouseX = (e.clientX - rect.left) * (WIDTH / rect.width);
+const mouseY = (e.clientY - rect.top) * (HEIGHT / rect.height);
+const waterTopY = TUBE_TOP + (1 - waterLevel) * TUBE_HEIGHT_PX;
+ 
+const handleX = TUBE_LEFT - 14;
+if (Math.abs(mouseX - handleX) < 20 && Math.abs(mouseY - waterTopY) < 20) { isDragging = true;
+dragStartY = mouseY;
+dragStartWaterLevel = waterLevel;
+canvas.style.cursor = 'ns-resize';
+} });
+ 
+canvas.addEventListener('mousemove', e => { if (!isDragging) return;
+const rect = canvas.getBoundingClientRect();
+const mouseY = (e.clientY - rect.top) * (HEIGHT / rect.height);
+const draggedFraction = (mouseY - dragStartY) / TUBE_HEIGHT_PX;
+ 
+waterLevel = Math.max(0.05, Math.min(0.98, dragStartWaterLevel - draggedFraction));
+document.getElementById('resWLtype').value = Math.round(waterLevel * 100);
+updateFormulaDisplay();
+if (!isForkRinging) render();
+});
+ 
+canvas.addEventListener('mouseup', () => { isDragging = false;
+canvas.style.cursor = 'ns-resize'; });
+ 
+canvas.addEventListener('mouseleave', () => { isDragging = false; });
+canvas.style.cursor = 'ns-resize';
+hintEl.textContent = 'Drag the green handle ↕ to raise/lower water level';
+updateFormulaDisplay();
+render();
+return function cleanup() {
+cancelAnimationFrame(animFrameId);
+isForkRinging = false;
+};
+};
+
+
 
   
