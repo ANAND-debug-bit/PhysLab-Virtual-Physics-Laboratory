@@ -188,4 +188,237 @@ window.setReadings(readingEl, [
 refreshInfoPanel();
 }
 
-
+function drawTitle() {
+ctx.fillStyle = '#2ee59d';
+ctx.font= 'bold 13px JetBrains Mono';
+ctx.fillText('SURFACE TENSION — Capillary Rise', 20, 22);
+ 
+ctx.fillStyle = '#4a6580';
+ctx.font = '11px JetBrains Mono';
+ctx.fillText('T = r·h·ρ·g / (2·cosθ)', 20, 38);
+}
+ 
+function drawBeaker(liquid) { ctx.fillStyle = liquid.fillColour;
+ctx.fillRect(BEAKER_X + 4, BEAKER_Y + 4, BEAKER_W - 8, BEAKER_H - 8);
+ctx.strokeStyle = '#64dfdf';
+ctx.lineWidth = 2.5;
+ctx.beginPath();
+ctx.moveTo(BEAKER_X, BEAKER_Y);
+ctx.lineTo(BEAKER_X, BEAKER_Y + BEAKER_H);
+ctx.lineTo(BEAKER_X + BEAKER_W, BEAKER_Y + BEAKER_H);
+ctx.lineTo(BEAKER_X + BEAKER_W, BEAKER_Y);
+ctx.stroke();
+ 
+ctx.strokeStyle = liquid.surfaceColour;
+ctx.lineWidth = 1.5;
+ctx.beginPath();
+ctx.moveTo(BEAKER_X + 4,BEAKER_Y + 4);
+ctx.lineTo(BEAKER_X + BEAKER_W - 4, BEAKER_Y + 4);
+ctx.stroke();
+ 
+ctx.fillStyle  = '#4A6580';
+ctx.font = '10px JetBrains Mono';
+ctx.textAlign  = 'center';
+ctx.fillText(liquid.label, BEAKER_X + BEAKER_W / 2, BEAKER_Y + BEAKER_H - 10);
+ctx.textAlign = 'left'; }
+ 
+function drawAllTubes(liquid, globalRise) { REFERENCE_TUBES.forEach((tube, index) => {
+const halfWidth = Math.max(3, tube.radius * 10);
+const cx = tube.centreX;
+ 
+const rInMetres = tube.radius / 1000;
+const cosTheta = Math.cos(contactAngle * Math.PI / 180);
+const tubeRise = (2 * surfaceTension * cosTheta) / (rInMetres * liquidDensity * GRAVITY);
+const isDepressed = tubeRise < 0;
+ 
+const risePx = Math.min(Math.abs(tubeRise) * 1500, MAX_RISE_PX);
+const liquidTopY = isDepressed
+? BEAKER_Y + 4 + risePx   // depression --> liquid goes down from beaker surface
+: BEAKER_Y + 4 - risePx;  // rise--> liquid goes UP
+ 
+// highlighting the second tube (index1)
+const isHighlighted = index === 1;
+ 
+ctx.strokeStyle = isHighlighted ? '#64dfdf' : '#2a4f7a';
+ctx.lineWidth = isHighlighted ? 2 : 1.5;
+ 
+ctx.beginPath();
+ctx.moveTo(cx - halfWidth - 2, TUBE_TOP);
+ctx.lineTo(cx - halfWidth - 2, TUBE_BOTTOM);
+ctx.stroke();
+ 
+ctx.beginPath();
+ctx.moveTo(cx + halfWidth + 2, TUBE_TOP);
+ctx.lineTo(cx + halfWidth + 2, TUBE_BOTTOM);
+ctx.stroke();
+ 
+// drawing the liquid column inside the tube
+ctx.fillStyle = liquid.fillColour;
+ctx.fillRect(cx - halfWidth, liquidTopY, halfWidth * 2, BEAKER_Y + 4 - liquidTopY);
+ 
+// drawing the meniscus (curved liquid surface at the top of the column)
+// Concave for wetting liquids (water), convex for non-wetting (mercury)
+ctx.fillStyle = liquid.surfaceColour;
+ctx.strokeStyle = liquid.surfaceColour;
+ctx.lineWidth = 1.5;
+ctx.beginPath();
+if (isDepressed) { ctx.arc(cx, liquidTopY, halfWidth, 0, Math.PI, false); }
+else { ctx.arc(cx, liquidTopY, halfWidth, 0, Math.PI, true); }
+ctx.fill();
+ 
+if (isHighlighted) { const hCm = (tubeRise * 100).toFixed(2);
+ 
+ctx.strokeStyle = '#ffb347';
+ctx.lineWidth = 1;
+ctx.setLineDash([4, 3]);
+ 
+ctx.beginPath();
+ctx.moveTo(cx + halfWidth + 10, BEAKER_Y + 4);
+ctx.lineTo(cx + halfWidth + 10, liquidTopY);
+ctx.stroke();
+ctx.setLineDash([]);
+ 
+// height label alongside the bracket
+ctx.fillStyle = '#ffb347';
+ctx.font = 'bold 10px JetBrains Mono';
+ctx.textAlign = 'left';
+ctx.fillText(`h=${hCm}cm`, cx + halfWidth + 14, (BEAKER_Y + 4 + liquidTopY) / 2 + 4);
+}
+ 
+// radius label above each tube
+ctx.fillStyle = isHighlighted ? '#64DFDF' : '#4A6580';
+ctx.font = '9px JetBrains Mono';
+ctx.textAlign = 'center';
+ctx.fillText(`r=${tube.radius}`, cx, TUBE_TOP - 8);
+ctx.fillText('mm', cx, TUBE_TOP - 18);
+ctx.textAlign = 'left';
+});
+}
+ 
+function drawParameterPanel(rise) {
+const panelX = 530;
+const panelY = 55;
+const panelW = 190;
+const panelH = 200;
+ 
+ctx.fillStyle = '#112240';
+ctx.strokeStyle = '#1e3a5f';
+ctx.lineWidth = 1;
+window._roundRect(ctx, panelX, panelY, panelW, panelH, 8);
+ctx.fill();
+ctx.stroke();
+ 
+ctx.fillStyle = '#2ee59d';
+ctx.font = 'bold 11px JetBrains Mono';
+ctx.fillText('PARAMETERS', panelX + 12, panelY + 18);
+ 
+const rows = [
+['r (selected)', `${capillaryRadius} mm`,'#64dfdf'],
+['h (rise)', `${(rise * 100).toFixed(3)} cm`,'#ffb347'],
+['ρ (density)',`${liquidDensity} kg/m³`, '#a855f7'],
+['θ (contact)',`${contactAngle}°`, '#2ee59d'],
+['T (surface)',`${(surfaceTension * 1000).toFixed(1)} mN/m`,'#ff6b6b'],
+];
+ 
+rows.forEach(([label, value, colour], i) => { const rowY = panelY + 36 + i * 26;
+ctx.fillStyle = '#4A6580';
+ctx.font = '10px JetBrains Mono';
+ctx.fillText(label, panelX + 12, rowY);
+ 
+ctx.fillStyle = colour;
+ctx.font = 'bold 11px JetBrains Mono';
+ctx.textAlign = 'right';
+ctx.fillText(value, panelX + 178, rowY);
+ctx.textAlign = 'left';
+}); }
+ 
+function drawGraph(rise) { const graphX = 530;
+const graphY = 55 + 165;  
+const graphW = 190;
+const graphH = 140;
+ 
+ctx.fillStyle = '#0a1628';
+ctx.strokeStyle = '#1e3a5f';
+ctx.lineWidth = 1;
+ctx.fillRect(graphX, graphY, graphW, graphH);
+ctx.strokeRect(graphX, graphY, graphW, graphH);
+ 
+ctx.fillStyle = '#4A6580';
+ctx.font = '10px JetBrains Mono';
+ctx.textAlign = 'center';
+ctx.fillText('h vs 1/r  (inverse relation)', graphX + graphW / 2, graphY - 6);
+ctx.textAlign  = 'left';
+ 
+// plotting the h v/s r curve over a range of radii to show the inverse proportionality 
+const MIN_RADIUS = 0.0003; 
+const MAX_RADIUS = 0.003;  
+ 
+ctx.strokeStyle = '#2ee59d';
+ctx.lineWidth = 2;
+ctx.beginPath();
+ 
+let firstPoint = true;
+for (let r = MIN_RADIUS; r <= MAX_RADIUS; r += 0.00005) {
+const h = (2 * surfaceTension * Math.cos(contactAngle * Math.PI / 180)) / (r * liquidDensity * GRAVITY);
+const px  = graphX + ((1 / r - 1 / MAX_RADIUS) / (1 / MIN_RADIUS - 1 / MAX_RADIUS)) * graphW;
+const py  = graphY + graphH - Math.min(1, h / 0.35) * (graphH - 20);
+ 
+firstPoint ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+firstPoint = false;
+}
+ctx.stroke();
+ 
+// dot marking to mark the current radius on the curve
+const curR = capillaryRadius / 1000;
+const dotX = graphX + ((1 / curR - 1 / MAX_RADIUS) / (1 / MIN_RADIUS - 1 / MAX_RADIUS)) * graphW;
+const dotY = graphY + graphH - Math.min(1, Math.abs(rise) / 0.35) * (graphH - 20);
+ 
+ctx.fillStyle = '#ffb347';
+ctx.beginPath();
+ctx.arc(dotX, dotY, 5, 0, Math.PI * 2);
+ctx.fill();
+ 
+ctx.fillStyle = '#4A6580';
+ctx.font = '9px JetBrains Mono';
+ctx.textAlign = 'center';
+ctx.fillText('→ 1/r', graphX + graphW - 10, graphY + graphH + 14);
+ 
+ctx.save();
+ctx.translate(graphX - 8, graphY + graphH / 2);
+ctx.rotate(-Math.PI / 2);
+ctx.fillText('h ↑', 0, 0);
+ctx.restore();
+ctx.textAlign = 'left';
+}
+ 
+// bottom bar showing the full formula with real numbers substituted in
+function drawFormulaBar(rise) { const barX = 20;
+const barY = CANVAS_H - 60;
+const barW = 490;
+const barH = 46;
+ 
+ctx.fillStyle = '#112240';
+ctx.strokeStyle = '#2ee59d';
+ctx.lineWidth = 1.5;
+window._roundRect(ctx, barX, barY, barW, barH, 8);
+ctx.fill();
+ctx.stroke();
+ 
+ctx.fillStyle = '#2ee59d';
+ctx.font = '11px JetBrains Mono';
+ctx.fillText( `T = r·h·ρ·g / 2cosθ = ${capillaryRadius}mm × ${(rise * 100).toFixed(3)}cm × ${liquidDensity} × 9.8 / 2`,
+barX + 8, barY + 20 );
+ 
+// result
+ctx.fillStyle = '#FFB347';
+ctx.font = 'bold 14px JetBrains Mono';
+ctx.fillText( `T = ${(surfaceTension * 1000).toFixed(2)} mN/m   h = ${(rise * 100).toFixed(3)} cm`,
+barX + 8, barY + 38
+); }
+ 
+hintEl.textContent = 'Adjust radius and liquid to see capillary rise change';
+refreshInfoPanel();
+render();
+return () => {};
+};
+ 
