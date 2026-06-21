@@ -201,3 +201,201 @@ ctx.font = '11px JetBrains Mono';
 ctx.textAlign = 'center';
 ctx.fillText('O', objX, axisY + 16);
 ctx.textAlign = 'left';
+
+// working out the image posn using lens formula 
+var v = getImageDist();
+var m = getMagnification();
+ 
+// drawing the rays and image only if it's real ofc :)
+if (isFinite(v) && Math.abs(v) < 150) { var imgX = lensX + v * SCALE;
+var imgH = objH * m;
+ 
+// defining all the rays its starting and ending position and the route through which it will travel
+ctx.strokeStyle = 'rgba(255,107,107,0.7)';
+ctx.lineWidth = 1.2;
+ctx.beginPath();
+ctx.moveTo(objX, axisY - objH);
+ctx.lineTo(lensX, axisY - objH);   
+ctx.lineTo(imgX, axisY - imgH);     
+ctx.stroke();
+ 
+ctx.strokeStyle = 'rgba(168,85,247,0.7)';
+ctx.lineWidth = 1.2;
+ctx.beginPath();
+ctx.moveTo(objX, axisY - objH);
+ctx.lineTo(imgX, axisY - imgH);
+ctx.stroke();
+ 
+ctx.strokeStyle = 'rgba(255,179,71,0.7)';
+ctx.lineWidth = 1.2;
+ctx.beginPath();
+ctx.moveTo(objX, axisY - objH);
+ctx.lineTo(lensX, axisY - imgH);  // hitting the lens at the image height
+ctx.lineTo(imgX, axisY - imgH);
+ctx.stroke();
+ 
+// deciding if the image is real or not
+var isReal = v > 0;
+ 
+var imageStrokeColor;
+if (isReal) { imageStrokeColor = '#ffb347'; } 
+else { imageStrokeColor = 'rgba(255,179,71,0.4)'; }
+ctx.strokeStyle = imageStrokeColor;
+ctx.lineWidth = 2;
+ 
+if (isReal) { ctx.setLineDash([]); } 
+else {ctx.setLineDash([4, 3]); }
+ 
+ctx.beginPath();
+ctx.moveTo(imgX, axisY);
+ctx.lineTo(imgX, axisY - imgH);
+ctx.stroke();
+ctx.setLineDash([]);
+ 
+var imageFillColor;
+if (isReal) { imageFillColor = '#ffb347';} 
+else { imageFillColor = 'rgba(255,179,71,0.5)'; }
+ctx.fillStyle = imageFillColor;
+ 
+if (imgH < 0) { ctx.beginPath();
+ctx.moveTo(imgX, axisY - imgH);
+ctx.lineTo(imgX - 7, axisY - imgH - 10);
+ctx.lineTo(imgX + 7, axisY - imgH - 10);
+ctx.closePath();
+ctx.fill();
+}
+else { ctx.beginPath();
+ctx.moveTo(imgX, axisY - imgH);
+ctx.lineTo(imgX - 7, axisY - imgH + 10);
+ctx.lineTo(imgX + 7, axisY - imgH + 10);
+ctx.closePath();
+ctx.fill(); }
+ 
+ctx.fillStyle = '#ffb347';
+ctx.font = '11px JetBrains Mono';
+ctx.textAlign = 'center';
+ctx.fillText("I", imgX, axisY + 16);
+ 
+var realOrVirtualText;
+if (isReal) { realOrVirtualText = 'Real'; } 
+else { realOrVirtualText = 'Virtual'; }
+ctx.fillText(realOrVirtualText, imgX, axisY + 28);
+ctx.textAlign = 'left';
+ctx.strokeStyle = 'rgba(255,179,71,0.3)';
+ctx.lineWidth = 1;
+ctx.setLineDash([4, 3]);
+ctx.beginPath();
+ctx.moveTo(lensX, axisY + 20);
+ctx.lineTo(imgX, axisY + 20);
+ctx.stroke();
+ctx.setLineDash([]);
+ 
+ctx.fillStyle = '#ffb347';
+ctx.font = '10px JetBrains Mono';
+ctx.textAlign = 'center';
+ctx.fillText('v = ' + v.toFixed(1) + ' cm', (lensX + imgX) / 2, axisY + 34);
+ctx.textAlign = 'left';}
+
+//object distance marker
+ctx.strokeStyle = 'rgba(46,229,157,0.3)';
+ctx.lineWidth = 1;
+ctx.setLineDash([4, 3]);
+ctx.beginPath();
+ctx.moveTo(lensX, axisY - 95);
+ctx.lineTo(objX, axisY - 95);
+ctx.stroke();
+ctx.setLineDash([]);
+ 
+ctx.fillStyle = '#2ee59d';
+ctx.font = '10px JetBrains Mono';
+ctx.textAlign = 'center';
+ctx.fillText('u = −' + objectDist + ' cm', (lensX + objX) / 2, axisY - 100);
+ctx.textAlign = 'left';
+ 
+ctx.fillStyle = '#2a4f7a';
+ctx.font = '9px JetBrains Mono';
+ctx.textAlign = 'center';
+for (var cm = -70; cm <= 70; cm += 10) { var px = lensX + cm * SCALE;
+ 
+if (px < 30 || px > W - 30) { continue; }
+ 
+ctx.fillRect(px, axisY - 3, 1, 6);
+ctx.fillText(cm, px, axisY + 46); }
+ctx.textAlign = 'left';
+ 
+// Drawing the reading box at the bottom of the canvas showing the formula and result
+ctx.fillStyle = '#112240';
+ctx.strokeStyle = '#2ee59d';
+ctx.lineWidth = 1.5;
+window._roundRect(ctx, 20, H - 72, W - 40, 58, 8);
+ctx.fill();
+ctx.stroke();
+ 
+var vText;
+if (isFinite(v)) { vText = v.toFixed(2);} 
+else { vText = '∞'; }
+ 
+ctx.fillStyle = '#2ee59d';
+ctx.font = '11px JetBrains Mono';
+ctx.fillText('1/f = 1/v − 1/u  →  1/' + focalLength + ' = 1/' + vText + ' − 1/(−' + objectDist + ')', 36, H - 50);
+ 
+var vStr;
+if (isFinite(v)) { vStr = v.toFixed(2) + ' cm'; } 
+else { vStr = '∞ (parallel rays)'; }
+ 
+// text for the magnification line
+var mText;
+if (isFinite(m)) { mText = m.toFixed(3); } 
+else { mText = '∞'; }
+ 
+ctx.fillStyle = '#ffb347';
+ctx.font = 'bold 14px JetBrains Mono';
+ctx.fillText('v = ' + vStr + '  |  m = ' + mText, 36, H - 28);
+ 
+var vReading;
+if (isFinite(v)) { vReading = v.toFixed(2); } 
+else { vReading = '∞'; }
+ 
+var mReading;
+if (isFinite(m)) { mReading = m.toFixed(3);}
+else { mReading = '∞'; }
+ 
+setReadings(readingEl, [
+['u (object)', '-' + objectDist, 'cm'],
+['f (focal)', focalLength, 'cm'],
+['v (image)', vReading, 'cm'],
+['m (magnif)', mReading, ''],
+]);
+ 
+updateCalc(); }
+ 
+canvas.addEventListener('mousedown', function(e) { var rect = canvas.getBoundingClientRect();
+var mx = (e.clientX - rect.left) * (W / rect.width);
+var objX = lensX - objectDist * SCALE;
+ 
+if (Math.abs(mx - objX) < 20) { isDragging = true;
+dragStartX = mx;
+dragStartU = objectDist;
+} });
+ 
+canvas.addEventListener('mousemove', function(e) { if (!isDragging) { return; }
+ 
+var rect = canvas.getBoundingClientRect();
+var mx = (e.clientX - rect.left) * (W / rect.width);
+var deltaU = (dragStartX - mx) / SCALE;
+ 
+// object distn sensible range from 5cm to 80cm
+objectDist = Math.max(5, Math.min(80, dragStartU + deltaU));
+ 
+document.getElementById('lensUR').value = objectDist;
+document.getElementById('lensU').textContent = objectDist.toFixed(1);
+render();
+});
+ 
+canvas.addEventListener('mouseup', function() { isDragging = false; });
+canvas.addEventListener('mouseleave', function() { isDragging = false; });
+canvas.style.cursor = 'ew-resize';
+render();
+hintEl.textContent = 'Drag the green object arrow ←→ or use sliders';
+return function() {};
+};
