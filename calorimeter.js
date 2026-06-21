@@ -201,4 +201,151 @@ ctx.font = '10px JetBrains Mono';
 ctx.fillText('T₀=' + ambientT + '°C', cx2, cy2 + 70);
 ctx.textAlign = 'left';
 
- 
+// drawing the graph
+
+ctx.fillStyle = '#112240';
+ctx.strokeStyle = '#1e3a5f';
+ctx.lineWidth = 1;
+ctx.fillRect(CX, CY, CW, CH);
+ctx.strokeRect(CX, CY, CW, CH);
+
+ctx.strokeStyle = 'rgba(30,58,95,0.8)';
+ctx.lineWidth = 1;
+for (var hi = 1; hi < 5; hi++) { var gy = CY + (CH / 5) * hi;
+ctx.beginPath();
+ctx.moveTo(CX, gy);
+ctx.lineTo(CX + CW, gy);
+ctx.stroke(); }
+
+for (var vi = 1; vi < 6; vi++) { var gx = CX + (CW / 6) * vi;
+ctx.beginPath();
+ctx.moveTo(gx, CY);
+ctx.lineTo(gx, CY + CH);
+ctx.stroke(); }
+
+// numbers labelling on the axis of the graph
+ctx.fillStyle = '#8ba3c0';
+ctx.font = '10px JetBrains Mono';
+ctx.textAlign = 'center';
+for (var ti = 0; ti <= 6; ti++) { var tx = CX + (CW / 6) * ti;
+ctx.fillText((ti * 100) + 's', tx, CY + CH + 14); }
+
+// temperature labels up the left side
+ctx.textAlign = 'right';
+var tempRange = initialT - ambientT + 10;
+for (var ri = 0; ri <= 5; ri++) { var ty = CY + CH - (CH / 5) * ri;
+var tv = Math.round(ambientT + (tempRange / 5) * ri);
+ctx.fillText(tv + '°', CX - 4, ty + 4); }
+ctx.textAlign = 'left';
+
+ctx.fillStyle = '#64dfdf';
+ctx.font = '11px JetBrains Mono';
+ctx.textAlign = 'center';
+ctx.fillText('Time (s)', CX + CW / 2, CY + CH + 30);
+
+ctx.save();
+ctx.translate(CX - 52, CY + CH / 2);
+ctx.rotate(-Math.PI / 2);
+ctx.fillText('Temperature (°C)', 0, 0);
+ctx.restore();
+
+ctx.strokeStyle = 'rgba(168,85,247,0.5)';
+ctx.lineWidth = 1;
+ctx.setLineDash([4, 4]);
+var ambY = tempToY(ambientT, tempRange);
+ctx.beginPath();
+ctx.moveTo(CX, ambY);
+ctx.lineTo(CX + CW, ambY);
+ctx.stroke();
+ctx.setLineDash([]);
+
+ctx.fillStyle = '#a855f7';
+ctx.font = '10px JetBrains Mono';
+ctx.fillText('T₀', CX + CW + 4, ambY + 4);
+
+// theoretical cooling curve (dim version)
+ctx.strokeStyle = 'rgba(46,229,157,0.2)';
+ctx.lineWidth = 1.5;
+ctx.beginPath();
+for (var t2 = 0; t2 <= 600; t2 += 5) { var Tt = ambientT + (initialT - ambientT) * Math.exp(-k * t2);
+var px = CX + (t2 / 600) * CW;
+var py = tempToY(Tt, tempRange);
+
+if (t2 === 0) { ctx.moveTo(px, py); } 
+else { ctx.lineTo(px, py); }
+}
+ctx.stroke();
+
+// curve tracing to show only the part of the curve we have reached so far
+ctx.strokeStyle = '#2ee59d';
+ctx.lineWidth = 2.5;
+ctx.beginPath();
+var maxT2 = elapsed;
+if (maxT2 > 600) { maxT2 = 600; }
+
+for (var t3 = 0; t3 <= maxT2; t3 += 2) { var Tt2 = ambientT + (initialT - ambientT) * Math.exp(-k * t3);
+var px2 = CX + (t3 / 600) * CW;
+var py2 = tempToY(Tt2, tempRange);
+
+if (t3 === 0) { ctx.moveTo(px2, py2); } 
+else { ctx.lineTo(px2, py2); }
+}
+ctx.stroke();
+
+// dot marking to mark the current temp
+var elapsedClamped = elapsed;
+if (elapsedClamped > 600) { elapsedClamped = 600; }
+var dotX = CX + (elapsedClamped / 600) * CW;
+var dotY = tempToY(T, tempRange);
+ctx.fillStyle = '#ffb347';
+ctx.beginPath();
+ctx.arc(dotX, dotY, 5, 0, Math.PI * 2);
+ctx.fill();
+
+for (var di = 0; di < dataPoints.length; di++) { var pt = dataPoints[di];
+var ptTime = pt.t;
+if (ptTime > 600) { ptTime = 600; }
+
+var ppx = CX + (ptTime / 600) * CW;
+var ppy = tempToY(pt.T, tempRange);
+
+ctx.fillStyle = '#ff6b6b';
+ctx.beginPath();
+ctx.arc(ppx, ppy, 3, 0, Math.PI * 2);
+ctx.fill(); }
+
+// reading box at the bottom side
+ctx.fillStyle = '#112240';
+ctx.strokeStyle = '#2ee59d';
+ctx.lineWidth = 1.5;
+window._roundRect(ctx, 20, H - 58, W - 40, 44, 8);
+ctx.fill();
+ctx.stroke();
+
+ctx.fillStyle = '#2ee59d';
+ctx.font = '11px JetBrains Mono';
+ctx.fillText( 'T(t) = ' + ambientT + ' + (' + initialT + '−' + ambientT + ')·e^(−' + k + '·t)',
+36, H - 38 );
+
+ctx.fillStyle = '#ffb347';
+ctx.font = 'bold 14px JetBrains Mono';
+ctx.fillText( 'Current: T = ' + T.toFixed(2) + '°C   t = ' + Math.round(elapsed) + 's',
+36, H - 18 );
+
+setReadings(readingEl, [
+['T current', T.toFixed(2),'°C'],
+['T ambient', ambientT,'°C'],
+['T − T₀', (T - ambientT).toFixed(2),'°C'],
+['Time', Math.round(elapsed),'s'],
+['k', k.toFixed(3),'s⁻¹'],
+]); }
+
+// helper function to convert the temperature into y coordinate
+function tempToY(T, range) { var frac = (T - ambientT) / range;
+return CY + CH - frac * CH; }
+
+hintEl.textContent = 'Press Start to begin cooling simulation';
+render();
+return function cleanup() { cancelAnimationFrame(rafId);
+isRunning = false; };
+};
