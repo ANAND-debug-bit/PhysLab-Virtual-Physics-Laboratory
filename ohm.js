@@ -191,4 +191,262 @@ ctx.fillText('EMF', bx + 10, by + 110);
 ctx.fillText(voltage.toFixed(1) + 'V', bx + 10, by + 122);
 ctx.textAlign = 'left';
 
-    
+// ammeter
+var ax = 175;
+var ay = by;
+ctx.fillStyle = '#1c3355';
+ctx.strokeStyle = '#ffb347';
+ctx.lineWidth = 1.5;
+ctx.beginPath();
+ctx.arc(ax, ay, 18, 0, Math.PI * 2);
+ctx.fill();
+ctx.stroke();
+
+ctx.fillStyle = '#ffb347';
+ctx.font = 'bold 13px JetBrains Mono';
+ctx.textAlign = 'center';
+ctx.fillText('A', ax, ay + 5);
+ctx.fillStyle = '#8BA3C0';
+ctx.font = '10px JetBrains Mono';
+ctx.fillText((I * 1000).toFixed(1) + 'mA', ax, ay + 32);
+ctx.textAlign = 'left';
+
+// resistor
+var rx = 230;
+var ry = by - 12;
+ctx.fillStyle = '#233d5c';
+ctx.strokeStyle = '#2ee59d';
+ctx.lineWidth = 1.5;
+ctx.fillRect(rx, ry, 70, 24);
+ctx.strokeRect(rx, ry, 70, 24);
+
+// zigzag line inside the resistor box
+ctx.strokeStyle = '#ffb347';
+ctx.lineWidth = 1.5;
+ctx.beginPath();
+for (var z = 0; z <= 7; z++) { var tx = rx + 5 + z * 8;
+
+var ty2;
+if (z % 2 === 0) { ty2 = ry + 5; }
+else { ty2 = ry + 19; }
+
+if (z === 0) { ctx.moveTo(tx, ty2); }
+else { ctx.lineTo(tx, ty2); } }
+ctx.stroke();
+
+ctx.fillStyle = '#2ee59d';
+ctx.font = '10px JetBrains Mono';
+ctx.textAlign = 'center';
+ctx.fillText(resistance + 'Ω', rx + 35, ry - 6);
+ctx.textAlign = 'left';
+
+// voltmeter
+var vx2 = 265;
+var vy2 = by + 80;
+ctx.strokeStyle = '#64dfdf';
+ctx.lineWidth = 1;
+ctx.setLineDash([3, 3]);
+ctx.beginPath();
+ctx.moveTo(230, by);
+ctx.lineTo(230, vy2 + 40);
+ctx.stroke();
+ctx.beginPath();
+ctx.moveTo(300, by);
+ctx.lineTo(300, vy2 + 40);
+ctx.stroke();
+ctx.setLineDash([]);
+
+ctx.fillStyle = '#1c3355';
+ctx.strokeStyle = '#64dfdf';
+ctx.lineWidth = 1.5;
+ctx.beginPath();
+ctx.arc(vx2, vy2 + 40, 18, 0, Math.PI * 2);
+ctx.fill();
+ctx.stroke();
+
+ctx.fillStyle = '#64dfdf';
+ctx.font = 'bold 13px JetBrains Mono';
+ctx.textAlign = 'center';
+ctx.fillText('V', vx2, vy2 + 45);
+ctx.fillStyle = '#8ba3c0';
+ctx.font = '10px JetBrains Mono';
+ctx.fillText(voltage.toFixed(2) + 'V', vx2, vy2 + 70);
+ctx.textAlign = 'left';
+
+// rheostat symbol
+var rhX = 340;
+var rhY = by;
+ctx.fillStyle = '#233d5c';
+ctx.strokeStyle = '#a855f7';
+ctx.lineWidth = 1.5;
+ctx.fillRect(rhX - 10, rhY - 10, 20, 20);
+ctx.strokeRect(rhX - 10, rhY - 10, 20, 20);
+ctx.fillStyle = '#a855f7';
+ctx.font = '10px JetBrains Mono';
+ctx.textAlign = 'center';
+ctx.fillText('RH', rhX, rhY - 14);
+ctx.textAlign = 'left';
+requestAnimationFrame(render);
+  }
+
+  // Drawing the rheostat slider track 
+function drawRheostat() { ctx.fillStyle = '#162844';
+ctx.strokeStyle = '#2a4f7a';
+ctx.lineWidth = 1.5;
+ctx.fillRect(RHEO_X, RHEO_Y, RHEO_W, 16);
+ctx.strokeRect(RHEO_X, RHEO_Y, RHEO_W, 16);
+
+var knobX = RHEO_X + ((voltage - 0.5) / 11.5) * RHEO_W;
+ctx.fillStyle = '#2ee59d';
+ctx.strokeStyle = '#0a1628';
+ctx.lineWidth = 2;
+ctx.beginPath();
+ctx.arc(knobX, RHEO_Y + 8, 12, 0, Math.PI * 2);
+ctx.fill();
+ctx.stroke();
+
+ctx.fillStyle = '#0a1628';
+ctx.font = 'bold 9px JetBrains Mono';
+ctx.textAlign = 'center';
+ctx.fillText(voltage.toFixed(1), knobX, RHEO_Y + 12);
+ctx.textAlign = 'left';
+
+ctx.fillStyle = '#8ba3c0';
+ctx.font = '10px JetBrains Mono';
+ctx.fillText('0.5V', RHEO_X - 4, RHEO_Y + 30);
+ctx.textAlign = 'right';
+ctx.fillText('12V', RHEO_X + RHEO_W + 4, RHEO_Y + 30);
+ctx.textAlign = 'left';
+
+ctx.fillStyle = '#a855f7';
+ctx.font = '11px JetBrains Mono';
+ctx.fillText('RHEOSTAT — drag to vary voltage', RHEO_X, RHEO_Y - 8); }
+
+  // Drawing the v-i graph
+function drawGraph(I) { ctx.fillStyle = '#112240';
+ctx.strokeStyle = '#1e3a5f';
+ctx.lineWidth = 1;
+ctx.fillRect(GX, GY, GW, GH);
+ctx.strokeRect(GX, GY, GW, GH);
+  
+ctx.strokeStyle = 'rgba(30,58,95,0.8)';
+ctx.lineWidth = 1;
+for (var i = 1; i < 5; i++) { var gy = GY + (GH / 5) * i;
+ctx.beginPath();
+ctx.moveTo(GX, gy);
+ctx.lineTo(GX + GW, gy);
+ctx.stroke(); }
+
+for (var j = 1; j < 6; j++) { var gx = GX + (GW / 6) * j;
+ctx.beginPath();
+ctx.moveTo(gx, GY);
+ctx.lineTo(gx, GY + GH);
+ctx.stroke(); }
+
+ctx.fillStyle = '#8ba3c0';
+ctx.font = '10px JetBrains Mono';
+ctx.textAlign = 'center';
+for (var xi = 0; xi <= 6; xi++) { var gxLabel = GX + (GW / 6) * xi;
+var Ival = (xi * 200).toFixed(0);
+ctx.fillText(Ival + 'mA', gxLabel, GY + GH + 14); }
+
+ctx.textAlign = 'right';
+for (var yi = 0; yi <= 5; yi++) { var gyLabel = GY + GH - (GH / 5) * yi;
+ctx.fillText((yi * 2.4).toFixed(1) + 'V', GX - 4, gyLabel + 4); }
+ctx.textAlign = 'left';
+
+ctx.fillStyle = '#64dfdf';
+ctx.font = '11px JetBrains Mono';
+ctx.textAlign = 'center';
+ctx.fillText('Current I (mA)', GX + GW / 2, GY + GH + 28);
+
+ctx.save();
+ctx.translate(GX - 44, GY + GH / 2);
+ctx.rotate(-Math.PI / 2);
+ctx.fillText('Voltage V (V)', 0, 0);
+ctx.restore();
+
+ctx.strokeStyle = 'rgba(46,229,157,0.25)';
+ctx.lineWidth = 1.5;
+ctx.beginPath();
+var firstPoint = true;
+for (var Iv = 0; Iv <= 1.2; Iv += 0.01) { var Vv = Iv * resistance;
+if (Vv > 12) { break; }
+
+var px = GX + (Iv * 1000 / 1200) * GW;
+var py = GY + GH - (Vv / 12) * GH;
+
+if (firstPoint) { ctx.moveTo(px, py);
+firstPoint = false; }
+else { ctx.lineTo(px, py); } }
+ctx.stroke();
+
+if (observations.length >= 2) { var lastObs = observations[observations.length - 1];
+ctx.strokeStyle ='#2ee59d';
+ctx.lineWidth = 2;
+ctx.beginPath();
+ctx.moveTo(GX, GY + GH);
+var endPx = GX + (lastObs.I * 1000 / 1200) * GW;
+var endPy = GY + GH - (lastObs.V / 12) * GH;
+ctx.lineTo(endPx, endPy);
+ctx.stroke(); }
+
+for (var k = 0; k < observations.length; k++) { var pt = observations[k];
+var ptPx = GX + (pt.I * 1000 / 1200) * GW;
+var ptPy = GY + GH - (pt.V / 12) * GH;
+
+ctx.fillStyle = '#ff6b6b';
+ctx.beginPath();
+ctx.arc(ptPx, ptPy, 4, 0, Math.PI * 2);
+ctx.fill(); }
+
+var livePx = GX + (I * 1000 / 1200) * GW;
+var livePy = GY + GH - (voltage / 12) * GH;
+ctx.fillStyle = '#ffb347';
+ctx.beginPath();
+ctx.arc(livePx, livePy, 6, 0, Math.PI * 2);
+ctx.fill();
+
+if (observations.length >= 2) {
+ctx.fillStyle = '#2ee59d';
+ctx.font = '10px JetBrains Mono';
+ctx.fillText('Slope = R = ' + resistance + 'Ω', GX + 8, GY + 16); }
+
+ctx.fillStyle = '#8ba3c0';
+ctx.font = 'bold 11px JetBrains Mono';
+ctx.textAlign = 'center';
+ctx.fillText('V-I CHARACTERISTIC', GX + GW / 2, GY - 8);
+ctx.textAlign = 'left'; }
+
+canvas.addEventListener('mousedown', function(e) { var rect = canvas.getBoundingClientRect();
+var mx = (e.clientX - rect.left) * (W / rect.width);
+var my = (e.clientY - rect.top) * (H / rect.height);
+var knobX = RHEO_X + ((voltage - 0.5) / 11.5) * RHEO_W;
+
+if (Math.abs(mx - knobX) < 20 && Math.abs(my - (RHEO_Y + 8)) < 20) { isDragging = true;
+dragStartX = mx;
+dragStartV = voltage;
+canvas.style.cursor = 'grabbing'; }
+});
+
+canvas.addEventListener('mousemove', function(e) { if (!isDragging) { return; }
+
+var rect = canvas.getBoundingClientRect();
+var mx = (e.clientX - rect.left) * (W / rect.width);
+var delta = (mx - dragStartX) / RHEO_W * 11.5;
+
+voltage = Math.max(0.5, Math.min(12, dragStartV + delta));
+
+document.getElementById('ohmV').value = voltage.toFixed(1);
+render();
+});
+
+canvas.addEventListener('mouseup', function() { isDragging = false;
+canvas.style.cursor = 'ew-resize'; });
+
+canvas.addEventListener('mouseleave', function() { isDragging = false; });
+
+canvas.style.cursor = 'ew-resize';
+hintEl.textContent = 'Drag the rheostat slider to vary voltage';
+render();
+return function cleanup() {}; };
