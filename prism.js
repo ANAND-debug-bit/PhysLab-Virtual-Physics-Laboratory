@@ -13,13 +13,12 @@ var animId;
 
 // #VIBGYOR
 var colors = {
-red:{ wavelength: 700, n: 1.513, color: '#ff4444' },
-orange:{ wavelength: 600, n: 1.519, color: '#ff8c00' },
-yellow:{ wavelength: 580, n: 1.523, color: '#ffd700' },
-green: { wavelength: 550, n: 1.530, color: '#44ff44' },
-blue: { wavelength: 450, n: 1.545, color: '#4444ff' },
-violet:{ wavelength: 400, n: 1.558, color: '#8b44ff' },
-};
+red:{ wavelength: 700, n: 1.513, color:'#ff4444' },
+orange:{ wavelength: 600, n: 1.519, color:'#ff8c00' },
+yellow:{ wavelength: 580, n: 1.523, color:'#ffd700' },
+green: { wavelength: 550, n: 1.530, color:'#44ff44' },
+blue: { wavelength: 450, n: 1.545, color:'#4444ff' },
+violet:{ wavelength: 400, n: 1.558, color:'#8b44ff' }, };
 
 function getDeviation(n) { var A = prismAngle * Math.PI / 180;
 var r1 = Math.asin(Math.sin(rotationAngle * Math.PI / 180) / n);
@@ -240,4 +239,133 @@ if (selectedColor !== 'white') { ctx.fillStyle = col.color;
 ctx.font = '10px JetBrains Mono';
 ctx.fillText('D=' + DmThisColor.toFixed(1) + '°', outX + 4, outY); } }
 
-   
+// normal line at the entry face 
+ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+ctx.lineWidth = 1;
+ctx.setLineDash([4, 4]);
+ctx.beginPath();
+ctx.moveTo(inEndX - 20, inEndY - 30);
+ctx.lineTo(inEndX + 20, inEndY + 30);
+ctx.stroke();
+ctx.setLineDash([]);
+ 
+// dispersion diagram panel on the right side
+var dx = 490;
+var dy = 60;
+ctx.fillStyle = '#112240';
+ctx.strokeStyle = '#2a4f7a';
+ctx.lineWidth = 1;
+ctx.fillRect(dx, dy, 230, 220);
+ctx.strokeRect(dx, dy, 230, 220);
+ctx.fillStyle = '#2ee59d';
+ctx.font = 'bold 11px JetBrains Mono';
+ctx.textAlign = 'center';
+ctx.fillText('Dispersion Pattern', dx + 115, dy + 18);
+ctx.textAlign = 'left';
+ 
+// spectrum bar 
+var specY = dy + 40;
+var gradient = ctx.createLinearGradient(dx + 20, specY, dx + 210, specY);
+gradient.addColorStop(0,'#ff4444');
+gradient.addColorStop(0.3,'#ffd700');
+gradient.addColorStop(0.5,'#44ff44');
+gradient.addColorStop(0.8,'#4444ff');
+gradient.addColorStop(1,'#8b44ff');
+ctx.fillStyle = gradient;
+ctx.fillRect(dx + 20, specY, 190, 18);
+ 
+var colorNames2 = Object.keys(colors);
+for (var j = 0; j < colorNames2.length; j++) {
+var name = colorNames2[j];
+var col2 = colors[name];
+var lx = dx + 20 + j * 32;
+ 
+ctx.fillStyle = col2.color;
+ctx.font = '9px JetBrains Mono';
+ctx.textAlign = 'center';
+ctx.fillText(name[0].toUpperCase(), lx, specY + 30);
+ 
+var Dm2 = getDm(col2.n);
+if (Dm2) { ctx.fillStyle = col2.color;
+ctx.font = '9px JetBrains Mono';
+ctx.fillText('n=' + col2.n, lx, specY + 42); } }
+ctx.textAlign = 'left';
+ 
+var refColor2;
+if (selectedColor === 'white') { refColor2 = 'yellow'; } 
+else { refColor2 = selectedColor; }
+ 
+var n = colors[refColor2].n;
+var Dm = getDm(n);
+ 
+var nStr;
+if (Dm !== null) { nStr = (Math.sin((prismAngle + Dm) / 2 * Math.PI / 180) / Math.sin(prismAngle / 2 * Math.PI / 180)).toFixed(4); }
+else { nStr = '—'; }
+ 
+ctx.fillStyle = '#112240';
+ctx.strokeStyle = '#2ee59d';
+ctx.lineWidth = 1.5;
+window._roundRect(ctx, dx + 10, dy + 130, 210, 75, 6);
+ctx.fill();
+ctx.stroke();
+ 
+ctx.fillStyle = '#2ee59d';
+ctx.font = '10px JetBrains Mono';
+ctx.fillText('A = ' + prismAngle + '°', dx + 20, dy + 150);
+ 
+var DmBoxText;
+if (Dm !== null) { DmBoxText = Dm.toFixed(2) + '°'; }
+else { DmBoxText = '—'; }
+ctx.fillText('D_m = ' + DmBoxText, dx + 20, dy + 164);
+ 
+ctx.fillStyle = '#ffb347';
+ctx.font = 'bold 12px JetBrains Mono';
+ctx.fillText('n = ' + nStr, dx + 20, dy + 182);
+ 
+ctx.fillStyle = '#4a6580';
+ctx.font = '9px JetBrains Mono';
+ctx.fillText('sin((A+Dm)/2)/sin(A/2)', dx + 20, dy + 196);
+ 
+ctx.fillStyle = '#112240';
+ctx.strokeStyle = '#2ee59d';
+ctx.lineWidth = 1.5;
+window._roundRect(ctx, 20, H - 62, 440, 48, 8);
+ctx.fill();
+ctx.stroke();
+ 
+var DmBottomText;
+if (Dm) { DmBottomText = Dm.toFixed(1); } 
+else { DmBottomText = 'D_m'; }
+ 
+ctx.fillStyle = '#2ee59d';
+ctx.font = '11px JetBrains Mono';
+ctx.fillText('n = sin((' + prismAngle + '+' + DmBottomText + ')/2) / sin(' + prismAngle + '/2)', 36, H - 42);
+ 
+ctx.fillStyle = '#ffb347';
+ctx.font = 'bold 13px JetBrains Mono';
+ctx.fillText('n = ' + nStr + '  for ' + refColor2 + ' light', 36, H - 24);
+ 
+var DmReading;
+if (Dm !== null) { DmReading = Dm.toFixed(2); } 
+else { DmReading = '—'; }
+ 
+setReadings(readingEl, [
+['Prism angle A', prismAngle, '°'],
+['D_m (min dev)', DmReading, '°'],
+['n (refractive)', nStr, ''],
+['Color', refColor2, ''],
+]);
+ 
+updateCalc(); }
+ 
+function loop() { animT++;
+render();
+animId = requestAnimationFrame(loop); }
+loop();
+ 
+hintEl.textContent = 'Rotate prism with slider — find minimum deviation';
+return function() { cancelAnimationFrame(animId); };
+};
+
+
+ 
