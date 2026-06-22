@@ -242,7 +242,7 @@ const renderers = {
 // 06(electrodynamics & magnetism)
     ohm:           window.mountOhm,
     wheatstone:    window.mountWheatstone,
-    potentiometer: window.mountPotentiometer, };
+};
 
 const fn = renderers[instrId];
 if (fn) { currentInstrumentCleanup = fn(
