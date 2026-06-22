@@ -290,22 +290,6 @@ steps: [ 'Connect unknown resistance S in one arm.',
 'S = R × (100 − l) / l (meter bridge formula).'
 ]
 }
-},
-
-{ id: 'potentiometer',
-icon: '🎚️',
-title: 'Potentiometer',
-desc: 'Compare EMFs of two cells or find internal resistance of a cell.',
-info: { about: 'A potentiometer is a device for measuring EMF accurately without drawing any current from the cell. It works on the principle that voltage is proportional to wire length.',
-formula: 'E₁/E₂ = l₁/l₂  |  r = R(l₁-l₂)/l₂',
-lc: 'Metre scale: 1 mm',
-steps: [ 'Set up the potentiometer with a driver cell.',
-'Connect the first cell and find balance length l₁ (null deflection).',
-'Replace with second cell and find balance length l₂.',
-'E₁/E₂ = l₁/l₂ gives the ratio of EMFs.',
-'For internal resistance: use a shunt R and note balance lengths with/without.'
-]
-}
 }
 ]
 }
