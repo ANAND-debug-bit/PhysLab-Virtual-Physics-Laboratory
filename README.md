@@ -12,21 +12,21 @@
 <h2>How To Use The Website</h2>
 
 <p>
- It's very easy just open the website and on the home screen you will see a cool animation of 3 different sine waves with a moving vernier calliper and an oscillating pendulum, click on the option of "Open the Lab" 
+ It's very easy just open the website and on the home screen you will see a cool animation of 3 different sine waves with a moving vernier calliper and an oscillating pendulum, click on the option of "Open the Lab" .
 
  ![image](https://www.image2url.com/r2/default/images/1782122933517-04dfcee8-3525-4f64-8aa1-5b70b240c0df.png)
 
 </p>
 <br>
 <p>
-After clicking you will see 6 major domains across high school physics under each domain there are 2-3 titles of experiments , pick any domain of your choice 
+After clicking you will see 6 major domains across high school physics under each domain there are 2-3 titles of experiments , pick any domain of your choice. 
 
 
 ![image](https://www.image2url.com/r2/default/images/1782123188921-70397c40-d5e3-4616-b105-0251cf0e137c.png)
 
 <br>
 <p>
-after clicking on any domain you will see the title cards of the experiment , click on any experiment you want to experience 
+after clicking on any domain you will see the title cards of the experiment , click on any experiment you want to experience .
 
 ![image](https://www.image2url.com/r2/default/images/1782123409175-f5b0eb30-e010-43ec-94df-88b98c363341.png)
 
@@ -56,17 +56,17 @@ after clicking on any experiment you will see the control panel , live reading b
 
 <ul>
 <li>Cool physics animation on the homescreen with a classic cyan neon vibe bcz neon is my fav.</li>
-<li>6 major domains across high school physics </li>
-<li>15+ experiments on the site (it can be extended upto as many experiments in future if i get a good response)</li>
-<li>Each experiment shows you the result instantly using real formulas</li>
-<li>Infinite many readings can be measured in any experiment</li>
-<li>Each experiment has a live reading box , control panel , theory box and a floating hint</li>
-<li>Unique ui with each experiment make it more inclusive and interesting</li>
+<li>6 major domains across high school physics. </li>
+<li>15+ experiments on the site (it can be extended upto as many experiments in future if i get a good response).</li>
+<li>Each experiment shows you the result instantly using real formulas and result can also be calculated by entering values manually.</li>
+<li>Infinite many readings can be measured in any experiment.</li>
+<li>Each experiment has a live reading box , control panel , theory box and a floating hint.</li>
+<li>Unique ui with each experiment make it more inclusive and interesting.</li>
 
 <hr>
 
 <h3> AI use </h3>
-<p>I used AI for all the content work and to learn about the conversion of physics and mathematics tools in javascript , initially it was bit difficult but when I got my hands by the start of 2 experiments it got much better and I also used ai in understanding about SVG(scalable vector graphics) though I have already built one project using this but this one was quite interesting in its own way </p>
+<p>I used AI for all the content work and to learn about the conversion of physics and mathematics tools in javascript , initially it was bit difficult but when I got my hands by the start of 2 experiments it got much better and I also used ai in understanding about SVG(scalable vector graphics) though I have already built one project using this but this one was quite interesting in its own way. </p>
 <hr>
 <h2>TECH STACK</h2>
 
