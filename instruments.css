@@ -42,9 +42,6 @@ color: var(--text-dim);}
 /* make every second row lighter so it is easier to read  */
 
 .obs-table tr:nth-child(even) td{background: rgba(255, 255, 255, 0.02);}
-
-/* ....  */
-
 .toggle-wrap{ display: flex;
 align-items: center;
 gap: 10px;
@@ -148,7 +145,7 @@ text-transform: uppercase; }
 .badge-cyan { background: rgba(100, 223, 223, 0.15); color: var(--cyan);}
 .badge-purple { background: rgba(168, 85, 247, 0.15); color: var(--purple);}
 
-/* ---- badge used to show error / LC (least count)values ---- */
+/*  badge used to show error / least count values*/
 .lc-badge { display: inline-flex;
 align-items: center;
 gap: 6px;
@@ -165,7 +162,7 @@ margin-bottom: 4px; }
 
 .lc-badge .lc-key { color: var(--text-mute); }
 
-/* the value part (e.g. 0.02 mm ) */
+/* the value part (example 0.02 mm ) */
 .lc-badge .lc-val { color: var(--cyan); font-weight: 600; }
 
 
