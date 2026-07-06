@@ -190,7 +190,7 @@ function closeCategoryModalOnBackdrop(e) {
 function closeCategoryModal() {
   document.getElementById('categoryModal').classList.remove('active');
 }
-// to open up a specific instrument modal and renders its interactive canvas
+
 function openInstrument(instrId, catId) { const cat = CATEGORIES[catId];
 const instr = cat.instruments.find(i => i.id === instrId);
 if (!instr) return;
@@ -233,22 +233,14 @@ content.innerHTML = ` <div class="instr-modal-header">
 
 modal.classList.add('active');
 
-// render the main theory formula
-if (window.katex) {
-  katex.render(instr.info.formula, document.getElementById('formulaBox'), {
-    throwOnError: false,
-    displayMode: true
-  });
-} else {
-  document.getElementById('formulaBox').textContent = instr.info.formula;
-}
 
-// render any inline \( ... \) math inside the steps list
-if (window.renderMathInElement) {
-  renderMathInElement(document.querySelector('.info-steps'), {
-    delimiters: [{ left: '\\(', right: '\\)', display: false }],
-    throwOnError: false
-  });
+if (window.katex) {katex.render(instr.info.formula, document.getElementById('formulaBox'), { throwOnError: false,
+    displayMode: true });
+} 
+else { document.getElementById('formulaBox').textContent = instr.info.formula; }
+
+if (window.renderMathInElement) { renderMathInElement(document.querySelector('.info-steps'), {
+delimiters: [{ left: '\\(', right: '\\)', display: false }], throwOnError: false });
 }
 
 modal.classList.add('active');
