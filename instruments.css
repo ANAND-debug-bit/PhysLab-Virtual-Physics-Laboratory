@@ -77,11 +77,11 @@ left: 2px;
 transition: transform 0.2s, background 0.2s; }
 
 /* when the checkbox is checked, change the slider background to green */
-.toggle-switch input:checked + .toggle-slider { background: var(--green-dim);}
+.toggle-switch input:checked + .toggle-slider { background: var(--rust);}
 
 /* and slide the dot to the right */
 .toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px);
-background: var(--green); }
+background: var(--teracotta); }
 
 
 .circuit-legend { display: flex;
@@ -126,7 +126,7 @@ padding-right: 12px; }
 .pendulum-data-item .val { font-family: var(--font-mono);
 font-size: 20px;
 font-weight: 700;
-color: var(--amber); }
+color: var(--brass); }
 
 /* the small label under the number */
 .pendulum-data-item .lbl { font-size: 11px;
@@ -143,10 +143,10 @@ font-weight: 700;
 letter-spacing: 0.08em;
 text-transform: uppercase; }
 
-.badge-green { background: rgba(46, 229, 157, 0.15); color: var(--green); }
-.badge-amber { background: rgba(255, 179, 71, 0.15); color: var(--amber); }
-.badge-cyan { background: rgba(100, 223, 223, 0.15); color: var(--cyan);}
-.badge-purple { background: rgba(168, 85, 247, 0.15); color: var(--purple);}
+.badge-green { background: rgba(168, 68, 46, 0.15); color: var(--teracotta); }
+.badge-amber { background: rgba(255, 179, 71, 0.15); color: var(--brass); }
+.badge-cyan { background: rgba(100, 223, 223, 0.15); color: var(--sage);}
+.badge-purple { background: rgba(168, 85, 247, 0.15); color: var(--brass-deep);}
 
 /* ---- badge used to show error / LC (least count)values ---- */
 .lc-badge { display: inline-flex;
@@ -166,7 +166,7 @@ margin-bottom: 4px; }
 .lc-badge .lc-key { color: var(--text-mute); }
 
 /* the value part (e.g. 0.02 mm ) */
-.lc-badge .lc-val { color: var(--cyan); font-weight: 600; }
+.lc-badge .lc-val { color: var(--sage); font-weight: 600; }
 
 
 /* section that lets the user record and list observations */
@@ -186,8 +186,8 @@ font-weight: 600;
 transition: all 0.2s;
 margin-bottom: 8px; }
 
-.obs-recorder button:hover { border-color: var(--green);
-color: var(--green); background: rgba(46, 229, 157, 0.05); }
+.obs-recorder button:hover { border-color: var(--teracotta);
+color: var(--teracotta); background: rgba(168, 68, 46, 0.05); }
 
 /* scrollable list of saved observations */
 .obs-list { max-height: 120px;

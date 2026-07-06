@@ -42,9 +42,9 @@ const W = canvas.width, H = canvas.height;
 let t = 0; 
 
 
-const waves = [ { amp: 40, freq: 0.025, speed: 0.04, color: '#2EE59D', alpha: 0.9, y: H/2 - 30 },
-{ amp: 28, freq: 0.04,  speed: 0.06, color: '#64DFDF', alpha: 0.6, y: H/2 },
-{ amp: 18, freq: 0.06,  speed: 0.09, color: '#FFB347', alpha: 0.4, y: H/2 + 30 },
+const waves = [ { amp: 40, freq: 0.025, speed: 0.04, color: '#A8442E', alpha: 0.9, y: H/2 - 30 },
+{ amp: 28, freq: 0.04,  speed: 0.06, color: '#6B7660', alpha: 0.6, y: H/2 },
+{ amp: 18, freq: 0.06,  speed: 0.09, color: '#9C7A3C', alpha: 0.4, y: H/2 + 30 },
 ];
 
 const pend = { cx: W -90, cy: 60,   
@@ -83,18 +83,18 @@ const by = pend.cy + pend.len * Math.cos(pend.angle);
 ctx.beginPath();
 ctx.moveTo(pend.cx, pend.cy);
 ctx.lineTo(bx, by);
-ctx.strokeStyle = '#8ba3c0';
+ctx.strokeStyle = '#534f45';
 ctx.lineWidth = 1.5;
 ctx.stroke();
 ctx.beginPath();
 ctx.arc(pend.cx, pend.cy, 4, 0, Math.PI * 2);
-ctx.fillStyle = '#8ba3c0';
+ctx.fillStyle = '#534f45';
 ctx.fill();
 
 ctx.beginPath();
 ctx.arc(bx, by, 10, 0, Math.PI * 2);
 const g2 = ctx.createRadialGradient(bx - 2, by - 2, 1, bx, by, 10);
-g2.addColorStop(0, '#ffb347');
+g2.addColorStop(0, '#9C7A3C');
 g2.addColorStop(1, '#a06a1a');
 ctx.fillStyle = g2;
 ctx.fill(); }
@@ -106,27 +106,27 @@ ctx.strokeStyle = '#2a4f7a';
 ctx.lineWidth = 1;
 ctx.fillRect(vx, vy, 300, 22);
 ctx.strokeRect(vx, vy, 300, 22);
-ctx.fillStyle = '#64dfdf';
+ctx.fillStyle = '#6B7660';
 for (let i = 0; i <= 30; i++) { const tx = vx + i * 10;
 const th = (i % 10 === 0) ? 14 : (i % 5 === 0 ? 10 : 6); 
 ctx.fillRect(tx, vy + 22 - th, 1, th);
 
-if (i % 10 === 0) { ctx.fillStyle = '#8ba3c0';
+if (i % 10 === 0) { ctx.fillStyle = '#534f45';
 ctx.font = '9px JetBrains Mono';
 ctx.fillText(String(i / 10), tx - 3, vy + 36);
-ctx.fillStyle = '#64dfdf';
+ctx.fillStyle = '#6B7660';
 } }
 
 const voff = 45 + 20 * Math.sin(t * 0.015);
 ctx.fillStyle = '#1c3355';
-ctx.strokeStyle = '#2ee59d';
+ctx.strokeStyle = '#A8442E';
 ctx.lineWidth = 1.5;
 ctx.fillRect(vx + voff, vy - 8, 50, 36);
 ctx.strokeRect(vx + voff, vy - 8, 50, 36);
-ctx.fillStyle = '#2ee59d';
+ctx.fillStyle = '#A8442E';
 for (let i = 0; i <= 10; i++) { const tx = vx + voff + i * 4.9;
 ctx.fillRect(tx, vy - 2, 1, 10); }
-ctx.fillStyle = '#2ee59d';
+ctx.fillStyle = '#A8442E';
 ctx.font = 'bold 10px JetBrains Mono';
 ctx.fillText('VERNIER CALLIPER', vx, vy - 14); }
 
