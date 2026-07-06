@@ -15,24 +15,16 @@ var animId;
 var colors = {
 red:{ wavelength: 700, n: 1.513, color:'#ff4444' },
 orange:{ wavelength: 600, n: 1.519, color:'#ff8c00' },
-yellow:{ wavelength: 580, n: 1.523, color:'#ffd700' },
-green: { wavelength: 550, n: 1.530, color:'#44ff44' },
-blue: { wavelength: 450, n: 1.545, color:'#4444ff' },
-violet:{ wavelength: 400, n: 1.558, color:'#8b44ff' }, };
-
-function getDeviation(n) { var A = prismAngle * Math.PI / 180;
-var r1 = Math.asin(Math.sin(rotationAngle * Math.PI / 180) / n);
-var r2 = A - r1;
-
-if (r2 < 0 || r2 > Math.PI / 2) { return null; }
-var e = Math.asin(n * Math.sin(r2));
-return (rotationAngle + e * 180 / Math.PI) - prismAngle; }
+yellow:{ wavelength: 580, n: 1.52, color:'#ffd700' },
+green: { wavelength: 550, n: 1.53, color:'#44ff44' },
+blue: { wavelength: 450, n: 1.54, color:'#4444ff' },
+violet:{ wavelength: 400, n: 1.56, color:'#8b44ff' }, };
 
 function getDm(n)  {var A = prismAngle * Math.PI / 180;
 var r = A / 2;
 var sinE = n * Math.sin(r);
 
-// if sinE is bigger than 1, there's no valid angle (TIR)
+// if sinE is bigger than 1, there's no valid angle (TIR > total internal reflection)
 if (Math.abs(sinE) > 1) { return null; }
 var e = Math.asin(sinE);
 return (2 * e - A) * 180 / Math.PI; }
@@ -64,7 +56,7 @@ colorButtonsHtml + '</div>' + '</div>' +
 '<div style="margin-top:8px;padding:10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;font-family:var(--font-mono);font-size:11px;line-height:1.9;">' +
 '<div id="prismCalc"></div>' +
 '</div>' + '<div class="obs-recorder">' +
-'<button onclick="prismRecord()">＋ Record D_m for color</button>' +
+'<button onclick="prismRecord()">＋ Record D<sub>m</sub> for color</button>' +
 '<div class="obs-list" id="prismObsList"></div>' +
 '</div>';
 
@@ -101,8 +93,8 @@ else { DmText = '—'; }
 
 document.getElementById('prismCalc').innerHTML =
 '<span style="color:var(--green)">A</span> = ' + A + '°<br>' +
-'<span style="color:var(--amber)">D_m</span> = ' + DmText + '<br>' +
-'<span style="color:var(--cyan)">n</span> = sin((A+D_m)/2) / sin(A/2) = ' + nCalc + '<br>' +
+'<span style="color:var(--amber)">D<sub>m</sub></span> = ' + DmText + '<br>' +
+'<span style="color:var(--cyan)">n</span> = sin((A+D<sub>m</sub>)/2) / sin(A/2) = ' + nCalc + '<br>' +
 '<span style="color:var(--text-mute)">Refractive index of glass</span>'; }
 
 var obsCount = 0;
@@ -125,7 +117,7 @@ else { DmText = '—'; }
 
 var list = document.getElementById('prismObsList');
 var row = document.createElement('div');
-row.innerHTML = '<span>#' + obsCount + ' ' + refColor + ' A=' + A + '°</span><span>D_m=' + DmText + '° n=' + nCalc + '</span>';
+row.innerHTML = '<span>#' + obsCount + ' ' + refColor + ' A=' + A + '°</span><span>D<sub>m</sub>=' + DmText + '° n=' + nCalc + '</span>';
 list.appendChild(row);
 list.scrollTop = list.scrollHeight; };
 
@@ -156,12 +148,12 @@ ctx.clearRect(0, 0, W, H);
 ctx.fillStyle = '#0d1e35';
 ctx.fillRect(0, 0, W, H);
 
-ctx.fillStyle = '#2ee59d';
+ctx.fillStyle = '#a8442e';
 ctx.font = 'bold 13px JetBrains Mono';
 ctx.fillText('PRISM SPECTROMETER', 20, 22);
-ctx.fillStyle = '#4a6580';
+ctx.fillStyle = '#8a8478';
 ctx.font = '11px JetBrains Mono';
-ctx.fillText('n = sin((A + D_m)/2) / sin(A/2)', 20, 38);
+ctx.fillText('n = sin((A + Dm)/2) / sin(A/2)', 20, 38);
 
 var pts = getPrismPoints();
 
@@ -175,7 +167,7 @@ ctx.closePath();
 ctx.fill();
 
 // drawing the prism outline the same way
-ctx.strokeStyle = '#64dfdf';
+ctx.strokeStyle = '#6b7660';
 ctx.lineWidth = 2;
 ctx.beginPath();
 for (var p2 = 0; p2 < pts.length; p2++) {
@@ -186,7 +178,7 @@ ctx.closePath();
 ctx.stroke();
 
 // angle label at the apex of the prism
-ctx.fillStyle = '#64dfdf';
+ctx.fillStyle = '#6b7660';
 ctx.font = 'bold 12px JetBrains Mono';
 ctx.textAlign = 'center';
 ctx.fillText('A=' + prismAngle + '°', pts[0].x, pts[0].y - 14);
@@ -252,12 +244,12 @@ ctx.setLineDash([]);
 // dispersion diagram panel on the right side
 var dx = 490;
 var dy = 60;
-ctx.fillStyle = '#112240';
-ctx.strokeStyle = '#2a4f7a';
+ctx.fillStyle = '#e3dac8';
+ctx.strokeStyle = 'rgba(27, 26, 23, 0.28)';
 ctx.lineWidth = 1;
 ctx.fillRect(dx, dy, 230, 220);
 ctx.strokeRect(dx, dy, 230, 220);
-ctx.fillStyle = '#2ee59d';
+ctx.fillStyle = '#a8442e';
 ctx.font = 'bold 11px JetBrains Mono';
 ctx.textAlign = 'center';
 ctx.fillText('Dispersion Pattern', dx + 115, dy + 18);
@@ -302,32 +294,32 @@ var nStr;
 if (Dm !== null) { nStr = (Math.sin((prismAngle + Dm) / 2 * Math.PI / 180) / Math.sin(prismAngle / 2 * Math.PI / 180)).toFixed(4); }
 else { nStr = '—'; }
  
-ctx.fillStyle = '#112240';
-ctx.strokeStyle = '#2ee59d';
+ctx.fillStyle = '#e3dac8';
+ctx.strokeStyle = '#a8442e';
 ctx.lineWidth = 1.5;
 window._roundRect(ctx, dx + 10, dy + 130, 210, 75, 6);
 ctx.fill();
 ctx.stroke();
  
-ctx.fillStyle = '#2ee59d';
+ctx.fillStyle = '#a8442e';
 ctx.font = '10px JetBrains Mono';
 ctx.fillText('A = ' + prismAngle + '°', dx + 20, dy + 150);
  
 var DmBoxText;
 if (Dm !== null) { DmBoxText = Dm.toFixed(2) + '°'; }
 else { DmBoxText = '—'; }
-ctx.fillText('D_m = ' + DmBoxText, dx + 20, dy + 164);
+ctx.fillText('Dm = ' + DmBoxText, dx + 20, dy + 164);
  
-ctx.fillStyle = '#ffb347';
+ctx.fillStyle = '#9c7a3c';
 ctx.font = 'bold 12px JetBrains Mono';
 ctx.fillText('n = ' + nStr, dx + 20, dy + 182);
  
-ctx.fillStyle = '#4a6580';
+ctx.fillStyle = '#8a8478';
 ctx.font = '9px JetBrains Mono';
 ctx.fillText('sin((A+Dm)/2)/sin(A/2)', dx + 20, dy + 196);
  
-ctx.fillStyle = '#112240';
-ctx.strokeStyle = '#2ee59d';
+ctx.fillStyle = '#e3dac8';
+ctx.strokeStyle = '#a8442e';
 ctx.lineWidth = 1.5;
 window._roundRect(ctx, 20, H - 62, 440, 48, 8);
 ctx.fill();
@@ -335,13 +327,13 @@ ctx.stroke();
  
 var DmBottomText;
 if (Dm) { DmBottomText = Dm.toFixed(1); } 
-else { DmBottomText = 'D_m'; }
+else { DmBottomText = 'Dm'; }
  
-ctx.fillStyle = '#2ee59d';
+ctx.fillStyle = '#a8442e';
 ctx.font = '11px JetBrains Mono';
 ctx.fillText('n = sin((' + prismAngle + '+' + DmBottomText + ')/2) / sin(' + prismAngle + '/2)', 36, H - 42);
  
-ctx.fillStyle = '#ffb347';
+ctx.fillStyle = '#9c7a3c';
 ctx.font = 'bold 13px JetBrains Mono';
 ctx.fillText('n = ' + nStr + '  for ' + refColor2 + ' light', 36, H - 24);
  
@@ -349,9 +341,8 @@ var DmReading;
 if (Dm !== null) { DmReading = Dm.toFixed(2); } 
 else { DmReading = '—'; }
  
-setReadings(readingEl, [
-['Prism angle A', prismAngle, '°'],
-['D_m (min dev)', DmReading, '°'],
+setReadings(readingEl, [ ['Prism angle A', prismAngle, '°'],
+['Dm (min dev)', DmReading, '°'],
 ['n (refractive)', nStr, ''],
 ['Color', refColor2, ''],
 ]);
