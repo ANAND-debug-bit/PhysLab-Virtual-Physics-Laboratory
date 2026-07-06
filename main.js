@@ -201,7 +201,6 @@ const modal = document.getElementById('instrumentModal');
 const content = document.getElementById('instrModalContent');
 const stepsHtml = instr.info.steps.map(s => `<li>${s}</li>`).join('');
 
-// to render the instrument modal layout
 content.innerHTML = ` <div class="instr-modal-header">
 <div class="instr-modal-title">${instr.icon} ${instr.title}</div>
 <div class="instr-modal-sub">${cat.title}</div>
@@ -222,7 +221,7 @@ content.innerHTML = ` <div class="instr-modal-header">
 <div class="info-panel">
 <h5>📚 Theory</h5>
 <p>${instr.info.about}</p>
-<div class="formula-box">${instr.info.formula}</div>
+<div class="formula-box" id="formulaBox"></div>
 <div class="lc-badge">
 <span class="lc-key">Least Count:</span>
 <span class="lc-val">${instr.info.lc}</span>
@@ -231,6 +230,26 @@ content.innerHTML = ` <div class="instr-modal-header">
 </div>
 </div>
 </div>`;
+
+modal.classList.add('active');
+
+// render the main theory formula
+if (window.katex) {
+  katex.render(instr.info.formula, document.getElementById('formulaBox'), {
+    throwOnError: false,
+    displayMode: true
+  });
+} else {
+  document.getElementById('formulaBox').textContent = instr.info.formula;
+}
+
+// render any inline \( ... \) math inside the steps list
+if (window.renderMathInElement) {
+  renderMathInElement(document.querySelector('.info-steps'), {
+    delimiters: [{ left: '\\(', right: '\\)', display: false }],
+    throwOnError: false
+  });
+}
 
 modal.classList.add('active');
 const wrap = document.getElementById('instrCanvasWrap');

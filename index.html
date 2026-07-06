@@ -8,6 +8,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="main.css" />
 <link rel="stylesheet" href="instruments.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 </head>
 <body>
 
@@ -26,7 +29,6 @@
 </div>
 </nav>
 
-<!-- hero section  -->
 <section class="hero">
 <div class="hero-grid-bg"></div>
 <div class="hero-content">
@@ -40,21 +42,18 @@
 </div>
 </section>
 
-<!-- 6 domains of physics  -->
- <!-- main header part of domains  -->
 <section id="categories" class="categories-section">
 <div class="section-header">
 <div class="section-eyebrow">Pick something you want to try</div>
 <h2 class="section-title">Lab Sections</h2>
 </div>
 <div class="categories-grid">
-<!-- domains start from here -->
+
 
 <div class="cat-card" data-cat="measurement" onclick="openCategory('measurement')">
 <div class="cat-icon">📏</div>
 <div class="cat-num">01</div>
 <h3>Measurement</h3>
-<!-- a statment at all domain cards -->
 
 <p>Ever struggled with a Vernier calliper or screw gauge in class? Practice here until it actually makes sense!</p>
 <div class="cat-tags">
@@ -127,7 +126,6 @@
 </div>
 </section>
 
-<!-- domain modal layout  -->
 <div id="categoryModal" class="modal-overlay" onclick="closeCategoryModal(event)">
 <div class="cat-modal">
 <button class="modal-close" onclick="closeCategoryModalBtn()">✕</button>
@@ -135,7 +133,6 @@
 </div>
 </div>
 
-<!-- instruments modal layout  -->
 <div id="instrumentModal" class="modal-overlay instrument-modal-overlay" onclick="closeInstrumentModal(event)">
 <div class="instr-modal">
 <button class="modal-close" onclick="closeInstrumentModalBtn()">✕</button>
@@ -143,7 +140,6 @@
 </div>
 </div>
 
-<!-- about section  -->
 <section id="about" class="about-section">
 <div class="about-inner">
 <div class="about-text">
