@@ -1,14 +1,12 @@
 // inclined plane 2d ineractive simulation involving critical & inclination angle, coefficient of static & kinetic friction , status of friction whether it is kinetic or static on the basis of inclination angle , alao a force analysis table , we can change the type of friction from the control panel
 
 window.mountInclined = function(wrap, readingEl, ctrlEl, hintEl) {
-
-// drawing the canvas 
+ 
 const WIDTH  = 740;  
 const HEIGHT = 360;  
 const canvas = window.makeCanvas(wrap, WIDTH, HEIGHT); 
 const ctx = canvas.getContext('2d');                
 
-// starting default values 
 let angle = 20;      
 let mass = 500;     
 let staticFriction = 0.40;   
@@ -19,52 +17,50 @@ let dragStartX = 0;
 let dragStartAngle = 0;    
 
 const GRAVITY = 9.8;
-  
-// small reusable helper functions to calculate important values
-// Kinetic friction is always slightly less than static friction  (reason: it's harder to start moving something than to keep it moving)
+const iid = 'inc_' + Math.random().toString(36).slice(2, 8);
 function getKineticFriction() { return staticFriction * 0.85;}
+function getEffectiveFriction() { return mode === 'kinetic' ? getKineticFriction() : staticFriction; }
 
-// perpendicular force only 
 function getNormalForce() { const massKg = mass / 1000;  
 const angleRad = angle * Math.PI / 180;          
 return massKg * GRAVITY * Math.cos(angleRad); }
 function getWeight() { return (mass / 1000) * GRAVITY; }
 
-// critical angle = the exact angle where the block is just about to start sliding
 function getCriticalAngle() { return Math.atan(staticFriction) * 180 / Math.PI; }
 function isBlockSliding() { return angle >= getCriticalAngle();}
 
 //building the control panel
 ctrlEl.innerHTML = ` <div class="ctrl-item">
 <label>Angle θ (°): <span id="incTheta">20</span></label>
-<input type="range" id="incThetaR" min="1" max="75" step="0.5" value="20" oninput="incUpdate()" />
+<input type="range" id="incThetaR" min="1" max="75" step="0.5" value="20" oninput="${iid}_update()" />
 </div>
 <div class="ctrl-item">
 <label>Mass (g): <span id="incMass">500</span></label>
-<input type="range" id="incMassR" min="100" max="2000" step="100" value="500" oninput="incUpdate()" />
+<input type="range" id="incMassR" min="100" max="2000" step="100" value="500" oninput="${iid}_update()" />
 </div>
 <div class="ctrl-item">
 <label>μₛ (static friction): <span id="incMu">0.40</span></label>
-<input type="range" id="incMuR" min="0.05" max="1.0" step="0.01" value="0.40" oninput="incUpdate()" />
+<input type="range" id="incMuR" min="0.05" max="1.0" step="0.01" value="0.40" oninput="${iid}_update()" />
 </div>
 <div class="ctrl-mode-btns" style="margin-top:8px;">
-<button class="mode-btn active" id="incM1" onclick="incSetMode('static')">Static</button>
-<button class="mode-btn"        id="incM2" onclick="incSetMode('kinetic')">Kinetic</button>
+<button class="mode-btn active" id="incM1" onclick="${iid}_setMode('static')">Static</button>
+<button class="mode-btn"        id="incM2" onclick="${iid}_setMode('kinetic')">Kinetic</button>
 </div>
 <div style="margin-top:10px;padding:10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;font-family:var(--font-mono);font-size:11px;line-height:1.9;">
 <div id="incInfo"></div>
 </div>
 <div class="obs-recorder">
-<button onclick="incRecord()">＋ Record Reading</button>
+<button onclick="${iid}_record()">＋ Record Reading</button>
 <div class="obs-list" id="incObsList"></div>
 </div> `;
 
-window.incSetMode = function(newMode) { mode = newMode;
+window[iid + '_setMode'] = function(newMode) { mode = newMode;
 document.getElementById('incM1').classList.toggle('active', newMode === 'static');
 document.getElementById('incM2').classList.toggle('active', newMode === 'kinetic');
+updateInfoPanel();
 render();  };
 
-window.incUpdate = function() { angle = parseFloat(document.getElementById('incThetaR').value);
+window[iid + '_update'] = function() { angle = parseFloat(document.getElementById('incThetaR').value);
 mass = parseInt  (document.getElementById('incMassR').value);
 staticFriction = parseFloat(document.getElementById('incMuR').value);
 
@@ -84,16 +80,16 @@ document.getElementById('incInfo').innerHTML = ` Critical angle = <span style="c
 <br>
 μₖ ≈ 0.85 μₛ  = <span style="color:var(--cyan)">${getKineticFriction().toFixed(3)}</span>
 <br>
+Mode: <span style="color:var(--amber)">${mode === 'kinetic' ? 'KINETIC (μₖ used)' : 'STATIC (μₛ used)'}</span>
+<br>
 Status: <span style="color:${sliding ? 'var(--red)' : 'var(--green)'}">
 ${sliding ? '🔴 SLIDING' : '🟢 STATIC'}
 </span>
 `; }
 
-// recording a reading and it will save the current angle and calculated coefficient of friction to a final where user can review 
-
 let readingCount = 0; 
 
-window.incRecord = function() { readingCount++;
+window[iid + '_record'] = function() { readingCount++;
 const muFromAngle = Math.tan(angle * Math.PI / 180);
 
 const list = document.getElementById('incObsList');
@@ -106,11 +102,11 @@ function render() { ctx.clearRect(0, 0, WIDTH, HEIGHT);
 ctx.fillStyle = '#0d1E35';
 ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-ctx.fillStyle = '#2ee59d';
+ctx.fillStyle = '#a8442e';
 ctx.font = 'bold 13px JetBrains Mono';
 ctx.fillText('INCLINED PLANE & FRICTION', 20, 22);
 
-ctx.fillStyle = '#4a6580';
+ctx.fillStyle = '#6b7660';
 ctx.font = '11px JetBrains Mono';
 ctx.fillText('μₛ = tan(θ_critical)|f = μN = μmg·cosθ', 20, 38);
 
@@ -120,7 +116,8 @@ const massKg = mass / 1000;
 const weight = massKg * GRAVITY;          
 const normalForce = weight * Math.cos(angleRad); 
 const gravityAlongSlope = weight * Math.sin(angleRad); 
-const maxStaticFriction = staticFriction * normalForce; 
+const effectiveMu = getEffectiveFriction();
+const maxFriction = effectiveMu * normalForce; 
 const sliding = isBlockSliding();
 const critAngle = getCriticalAngle();
 
@@ -182,7 +179,7 @@ ctx.translate(blockCenterX, blockCenterY);
 ctx.rotate(-angleRad);                 
 
 const blockFillColor = sliding ? '#3d1515' : '#1c3355';    
-const blockBorderColor = sliding ? '#ff6b6b' : (mode === 'kinetic' ? '#ffb347' : '#2ee59d'); 
+const blockBorderColor = sliding ? '#ff6b6b' : (mode === 'kinetic' ? '#ffb347' : '#a8442e'); 
 
 ctx.fillStyle = blockFillColor;
 ctx.strokeStyle = blockBorderColor;
@@ -197,8 +194,6 @@ ctx.textAlign  = 'center';
 ctx.fillText(`${mass}g`, 0, -BLOCK_SIZE /2 +4);
 ctx.textAlign  = 'left';
 
-// drawing force arrows 
-// weight(mg) force arrow
 const weightArrowLen = weight * 12; 
 ctx.strokeStyle = '#ff6b6b'; 
 ctx.lineWidth   = 2;
@@ -238,11 +233,10 @@ ctx.fill();
  
 ctx.fillText(`N=${normalForce.toFixed(1)}N`, 22, -BLOCK_SIZE - normalArrowLen / 2);
  
-// friction force (f) arrow
-const frictionArrowLen = Math.min(maxStaticFriction, gravityAlongSlope) * 12;
-const frictionColor = sliding ? '#ff6b6b' : '#2ee59d';
+const frictionArrowLen = Math.min(maxFriction, gravityAlongSlope) * 12;
+const frictionColor = sliding ? '#ff6b6b' : '#a8442e';
 ctx.strokeStyle = frictionColor;
-ctx.lineWidth   = 2;
+ctx.lineWidth = 2;
 ctx.beginPath();
 ctx.moveTo(-BLOCK_SIZE / 2,-BLOCK_SIZE / 2); 
 ctx.lineTo(-BLOCK_SIZE / 2 - frictionArrowLen,  -BLOCK_SIZE / 2); 
@@ -308,17 +302,17 @@ const forceRows = [
 ['Weight W',`${weight.toFixed(2)} N`,'#ff6b6b'],
 ['Normal N',`${normalForce.toFixed(2)} N`,'#64dfdf'],
 ['F_gravity ∥',`${gravityAlongSlope.toFixed(2)} N`,'#ffb347'],
-['Max static f', `${maxStaticFriction.toFixed(2)} N`,'#2ee59d'],
-['μₛ',staticFriction.toFixed(3),'#a855f7'],
-['μₖ',getKineticFriction().toFixed(3), '#a855f7'],
+['Max friction f', `${maxFriction.toFixed(2)} N`,'#a8442e'],
+['μₛ',staticFriction.toFixed(3),'#9c7a3c'],
+['μₖ',getKineticFriction().toFixed(3), '#9c7a3c'],
 ];
 ctx.font= 'bold 11px JetBrains Mono';
-ctx.fillStyle = '#2ee59d';
+ctx.fillStyle = '#a8442e';
 ctx.fillText('FORCE ANALYSIS', panelX + 12, panelY + 18);
  
 forceRows.forEach(function([label, value, color], index) { const rowY = panelY + 36 + index * 22;
  
-ctx.fillStyle = '#4a6580';
+ctx.fillStyle = '#6b7660';
 ctx.font = '10px JetBrains Mono';
 ctx.fillText(label, panelX + 12, rowY);
  
@@ -329,42 +323,41 @@ ctx.fillText(value, panelX + 228, rowY);
 ctx.textAlign = 'left';
 });
  
-// bottom status bar to show the key formula plus the sliding status
 ctx.fillStyle = '#112240';
-ctx.strokeStyle = '#2ee59d';
+ctx.strokeStyle = '#a8442e';
 ctx.lineWidth = 1.5;
 window._roundRect(ctx, 20, HEIGHT - 62, WIDTH - 40, 48, 8);
 ctx.fill();
 ctx.stroke();
  
-// to show the coefficient of static frn = tan(θ_c) result
-ctx.fillStyle = '#2ee59d';
+ctx.fillStyle = '#a8442e';
 ctx.font = '11px JetBrains Mono';
-ctx.fillText( `μₛ = tan(θ_c) = tan(${critAngle.toFixed(2)}°) = ${staticFriction.toFixed(3)}`, 36, HEIGHT - 40 );
+ctx.fillText( `μ${mode === 'kinetic' ? 'ₖ' : 'ₛ'} = ${mode === 'kinetic' ? '0.85·tan(θ_c)' : 'tan(θ_c)'} = tan(${critAngle.toFixed(2)}°) = ${effectiveMu.toFixed(3)}`, 36, HEIGHT - 40 );
  
 ctx.fillStyle = sliding ? '#ff6b6b' : '#ffb347';
 ctx.font = 'bold 14px JetBrains Mono';
-ctx.fillText( `θ = ${angle.toFixed(1)}°  →  ${ sliding ? 'SLIDING (θ > θ_c)'
-: 'STATIC (θ < θ_c = ' + critAngle.toFixed(1) + '°)' }`, 36, HEIGHT - 20 );
+ctx.fillText( `θ = ${angle.toFixed(1)}°  →  ${ sliding ? 'SLIDING (θ > θ_c)' : 'STATIC (θ < θ_c = ' + critAngle.toFixed(1) + '°)' }`, 36, HEIGHT - 20 );
  
 window.setReadings(readingEl, [
 ['Angle θ',angle.toFixed(1), '°'],
 ['Critical θ', critAngle.toFixed(2), '°'],
+['Mode', mode === 'kinetic' ? 'Kinetic' : 'Static', ''],
+['μ (effective)', effectiveMu.toFixed(3), ''],
 ['μₛ',staticFriction.toFixed(3), ''],
 ['μₖ',getKineticFriction().toFixed(3),''],
 ['Status',sliding ? 'SLIDING' : 'STATIC', ''],
 ]);
  
 updateInfoPanel();  }
- 
-canvas.addEventListener('mousedown', function(event) {
+
+function onMouseDown(event) {
 const rect   = canvas.getBoundingClientRect();
 const mouseX = (event.clientX - rect.left) * (WIDTH/ rect.width);
 const mouseY = (event.clientY - rect.top)  * (HEIGHT / rect.height);
 if (mouseX > 60 && mouseX < 470 && mouseY > 60 && mouseY < 310) {
-isDragging     = true; dragStartX     = mouseX; dragStartAngle = angle; } });
- 
-canvas.addEventListener('mousemove', function(event) {
+isDragging = true; dragStartX     = mouseX; dragStartAngle = angle; } }
+
+function onMouseMove(event) {
 if (!isDragging) return; 
 const rect   = canvas.getBoundingClientRect();
 const mouseX = (event.clientX - rect.left) * (WIDTH / rect.width);
@@ -377,14 +370,24 @@ document.getElementById('incTheta').textContent = angle.toFixed(1);
  
 updateInfoPanel();
 render();
-});
- 
-canvas.addEventListener('mouseup',function() { isDragging = false; }); 
-canvas.addEventListener('mouseleave', function() { isDragging = false; });
+}
+
+function onMouseUp() { isDragging = false; }
+function onMouseLeave() { isDragging = false; }
+
+canvas.addEventListener('mousedown', onMouseDown);
+canvas.addEventListener('mousemove', onMouseMove);
+canvas.addEventListener('mouseup', onMouseUp); 
+canvas.addEventListener('mouseleave', onMouseLeave);
 canvas.style.cursor = 'ew-resize'; 
-hintEl.textContent  = 'Drag on ramp or use slider to change angle θ';
+hintEl.textContent = 'Drag on ramp or use slider to change angle θ';
  
 updateInfoPanel(); 
 render();         
-return function() {};
+return function cleanup() {
+canvas.removeEventListener('mousedown', onMouseDown);
+canvas.removeEventListener('mousemove', onMouseMove);
+canvas.removeEventListener('mouseup', onMouseUp);
+canvas.removeEventListener('mouseleave', onMouseLeave);
+};
 };
