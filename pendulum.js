@@ -1,7 +1,6 @@
 //pendulum 2d interactive modal invloves length , amplitude as well as a feature of play on clicking that we can see the infinite no. of oscillations with that particular set of data and also a feature to calculate time period within 10 oscillations. 
 window.mountPendulum = function(wrap, readingEl, ctrlEl, hintEl) {
 
-// drawing canvas
 const W = 740, H = 380;
 const canvas = makeCanvas(wrap, W, H);
 const ctx = canvas.getContext('2d'); 
@@ -20,32 +19,33 @@ let timing = false;
 let oscStart = 0;         
 let measuredT = null;     
 
-// building the Controls Panel (sliders + buttons) 
+const pid = 'pend_' + Math.random().toString(36).slice(2, 8);
+
+// building the Controls Panel  
 
 ctrlEl.innerHTML = ` <div class="ctrl-item">
 <label>Length L (m): <span id="pendL">0.50</span></label>
-<input type="range" id="pendLRange" min="0.1" max="2.0" step="0.01" value="0.5" oninput="pendUpdate()" /> </div>
+<input type="range" id="pendLRange" min="0.1" max="2.0" step="0.01" value="0.5" oninput="${pid}_update()" /> </div>
 <div class="ctrl-item">
 <label>Amplitude θ (°): <span id="pendA">15</span></label>
-<input type="range" id="pendARange" min="2" max="30" step="1" value="15" oninput="pendUpdate()" />
+<input type="range" id="pendARange" min="2" max="30" step="1" value="15" oninput="${pid}_update()" />
 </div>
 <div style="display:flex;gap:8px;margin-top:4px;">
-<button class="mode-btn active" id="pendPlay" onclick="pendToggle()" style="flex:1;">⏸ Pause</button>
-<button class="mode-btn" onclick="pendReset()" style="flex:1;">↺ Reset</button>
+<button class="mode-btn active" id="pendPlay" onclick="${pid}_toggle()" style="flex:1;">⏸ Pause</button>
+<button class="mode-btn" onclick="${pid}_reset()" style="flex:1;">↺ Reset</button>
 </div>
 <div style="margin-top:10px;">
-<button class="mode-btn" onclick="pendStartTime()" style="width:100%;background:rgba(46,229,157,0.1);border-color:var(--green);color:var(--green);" id="pendTimeBtn">⏱ Time 10 Oscillations</button>
+<button class="mode-btn" onclick="${pid}_startTime()" style="width:100%;background:rgba(46,229,157,0.1);border-color:var(--green);color:var(--green);" id="pendTimeBtn">⏱ Time 10 Oscillations</button>
 <div id="pendTimeStatus" style="font-size:11px;color:var(--text-mute);margin-top:6px;font-family:var(--font-mono);">
 Press button, then watch 10 swings
 </div>
 </div> <div class="obs-recorder">
-<button onclick="pendRecord()">＋ Record Observation</button>
+<button onclick="${pid}_record()">＋ Record Observation</button>
 <div class="obs-list" id="pendObsList"></div>
 </div>`;
 
-// function which will be called when the user moves a slider 
-// updates the values and restarts the pendulum from its starting angle
-window.pendUpdate = function() {
+// function which will be called when the user moves a slider ,, updates the values and restarts the pendulum from its starting angle
+window[pid + '_update'] = function() {
 length    = parseFloat(document.getElementById('pendLRange').value);
 amplitude = parseFloat(document.getElementById('pendARange').value);
 
@@ -59,13 +59,11 @@ timing = false;
 measuredT = null;
 document.getElementById('pendTimeStatus').textContent = 'Press button, then watch 10 swings'; };
 
-// play / pause button 
-window.pendToggle = function() { running = !running; 
+window[pid + '_toggle'] = function() { running = !running; 
 document.getElementById('pendPlay').textContent = running ? '⏸ Pause' : '▶ Play';
 document.getElementById('pendPlay').classList.toggle('active', running); };
 
-// reset button
-window.pendReset = function() { angle = amplitude * Math.PI / 180;
+window[pid + '_reset'] = function() { angle = amplitude * Math.PI / 180;
 angVel= 0;
 time = 0;
 oscCount = 0;
@@ -73,9 +71,7 @@ timing = false;
 measuredT = null;
 document.getElementById('pendTimeStatus').textContent = 'Press button, then watch 10 swings'; };
 
-// building time 10 Oscillations button 
-// resets the pendulum and starts counting 10 full swings to measure the time period of the pendulum
-window.pendStartTime = function() { angle    = amplitude * Math.PI / 180;
+window[pid + '_startTime'] = function() { angle    = amplitude * Math.PI / 180;
 angVel = 0;
 time = 0;
 oscCount = 0;
@@ -86,11 +82,9 @@ running = true;
 document.getElementById('pendPlay').textContent = '⏸ Pause';
 document.getElementById('pendTimeStatus').textContent = '⏱ Counting oscillations... (0/10)'; };
 
-// inserting record Observation button 
-// it will save a snapshot of the current length and calculated time period to a list
 let obsCount = 0;
-window.pendRecord = function() { obsCount++;
-const T = theoreticalT();               
+window[pid + '_record'] = function() { obsCount++;
+const T = measuredT !== null ? measuredT : theoreticalT();               
 const calcG = (4 * Math.PI * Math.PI * length) / (T * T); 
 
 const list = document.getElementById('pendObsList');
@@ -210,36 +204,27 @@ setReadings(readingEl, [ ['Length L', length.toFixed(2), 'm'],
 ]);
 }
  
-// now it's time for the animation  loop
-// it will run every frame (60 times per second) to update and redraw the pendulum
 let animId;
-function loop() {
-if (running) {
-//pendulum's angular acceleration = -(g / L) × sin(angle)
-// this is actually the real physics formula for a simple pendulum
+function loop() { if (running) {
 angVel += (-g / length) * Math.sin(angle) * dt;
 angVel *= 0.9998;
 const prevSign = Math.sign(angle);
 angle += angVel;
 time  += dt;
  
-// count oscillations (an oscillation completes each time the pendulum crosses from the right side)
+// counting oscillations 
 
 if (timing && prevSign > 0 && Math.sign(angle) <= 0) {
 oscCount++;
  
 if (oscCount === 1) oscStart = time;
- document.getElementById('pendTimeStatus').textContent = `⏱ Counting... (${oscCount}/10)`;
- if (oscCount >= 10) { measuredT = (time - oscStart) / 9; 
+ document.getElementById('pendTimeStatus').textContent = `⏱ Counting... (${oscCount - 1}/10)`;
+ if (oscCount >= 11) { measuredT = (time - oscStart) / 10; 
 timing    = false; document.getElementById('pendTimeStatus').textContent = `✅ T (measured) = ${measuredT.toFixed(3)} s`;
 } } }
  
 render();
-animId = requestAnimationFrame(loop);
-}
+animId = requestAnimationFrame(loop); }
 loop();
 hintEl.textContent = 'Adjust length & amplitude with sliders';
-return () => cancelAnimationFrame(animId);
-};
-
- 
+return () => cancelAnimationFrame(animId); };
