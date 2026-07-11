@@ -13,51 +13,51 @@ var elapsed = 0;
 var rafId = null;       
 var lastTime = null;    
 
-// to store temperature readings we record while the sim runs
-// each entry looks like: { t: 30, T: 65.2 }  -->  "at 30 seconds, temp was 65.2"
+var cid = 'cl_' + Math.random().toString(36).slice(2, 8);
+
 var dataPoints = [];
-var recordInterval = 0; // counts up to 30 seconds before saving a new point
+var recordInterval = 0; 
 
 // building the control panel
 ctrlEl.innerHTML = ` <div class="ctrl-item">
 <label>Ambient Temp T₀ (°C): <span id="clAmbient">30</span></label>
-<input type="range" id="clAmbientR" min="15" max="40" step="1" value="30" oninput="clUpdateAmbient()" />
+<input type="range" id="clAmbientR" min="15" max="40" step="1" value="30" oninput="${cid}_updateAmbient()" />
 </div>
 <div class="ctrl-item">
 <label>Initial Temp (°C): <span id="clInitial">80</span></label>
-<input type="range" id="clInitialR" min="50" max="95" step="1" value="80" oninput="clUpdateInitial()" />
+<input type="range" id="clInitialR" min="50" max="95" step="1" value="80" oninput="${cid}_updateInitial()" />
 </div>
 <div class="ctrl-item">
 <label>Cooling constant k: <span id="clK">0.025</span></label>
-<input type="range" id="clKR" min="0.005" max="0.06" step="0.005" value="0.025" oninput="clUpdateK()" />
+<input type="range" id="clKR" min="0.005" max="0.06" step="0.005" value="0.025" oninput="${cid}_updateK()" />
 </div>
 <div style="display:flex;gap:8px;margin-top:4px;">
-<button class="mode-btn active" id="clStartBtn" onclick="clToggle()" style="flex:1;">▶ Start</button>
-<button class="mode-btn" onclick="clReset()" style="flex:1;">↺ Reset</button>
+<button class="mode-btn active" id="clStartBtn" onclick="${cid}_toggle()" style="flex:1;">▶ Start</button>
+<button class="mode-btn" onclick="${cid}_reset()" style="flex:1;">↺ Reset</button>
 </div>
 <div class="obs-recorder" style="margin-top:8px;">
 <div class="obs-list" id="clObsList" style="max-height:90px;"></div>
 </div> `;
 
-// functions which will run when sliders are moved 
-window.clUpdateAmbient = function () { ambientT = parseInt(document.getElementById('clAmbientR').value);
+window[cid + '_updateAmbient'] = function () { ambientT = parseInt(document.getElementById('clAmbientR').value);
 document.getElementById('clAmbient').textContent = ambientT;
-if (isRunning === false) { render(); } };
+if (isRunning === false) { elapsed = 0;
+dataPoints = [];
+document.getElementById('clObsList').innerHTML = '';
+render(); } };
 
-// called when the initial temp slider moves
-window.clUpdateInitial = function () { initialT = parseInt(document.getElementById('clInitialR').value);
+window[cid + '_updateInitial'] = function () { initialT = parseInt(document.getElementById('clInitialR').value);
 document.getElementById('clInitial').textContent = initialT;
 if (isRunning === false) { elapsed = 0;
 dataPoints = [];
+document.getElementById('clObsList').innerHTML = '';
 render(); } };
 
-// called when the cooling const k  slider moves
-window.clUpdateK = function () { k = parseFloat(document.getElementById('clKR').value);
+window[cid + '_updateK'] = function () { k = parseFloat(document.getElementById('clKR').value);
 document.getElementById('clK').textContent = k.toFixed(3);
 if (isRunning === false) { render(); } };
 
-// called when the Start/Pause button is clicked
-window.clToggle = function () { if (isRunning === true) {
+window[cid + '_toggle'] = function () { if (isRunning === true) {
 isRunning = false;
 cancelAnimationFrame(rafId);
 document.getElementById('clStartBtn').textContent = '▶ Start';
@@ -67,9 +67,8 @@ lastTime = null;
 document.getElementById('clStartBtn').textContent = '⏸ Pause';
 document.getElementById('clStartBtn').classList.add('active');
 rafId = requestAnimationFrame(animate); } };
-
-//reset button  
-window.clReset = function () { isRunning = false;
+  
+window[cid + '_reset'] = function () { isRunning = false;
 cancelAnimationFrame(rafId);
 elapsed = 0;
 dataPoints = [];
@@ -81,10 +80,8 @@ render(); };
 
 function currentTemp() { return ambientT + (initialT - ambientT) * Math.exp(-k * elapsed); }
 
-// animation loop
 function animate(ts) { if (lastTime === null) { lastTime = ts; }
 
-// dt(how much real time is passed )
 var dt = (ts - lastTime) / 1000;
 lastTime = ts;
 elapsed = elapsed + dt * 20;
@@ -110,7 +107,6 @@ document.getElementById('clStartBtn').classList.remove('active'); }
 render();
 if (isRunning === true) { rafId = requestAnimationFrame(animate);} }
 
-//positioning of graph
 var CX = 80;
 var CY = 40;
 var CW = 500;
@@ -119,11 +115,11 @@ var CH = 220;
 function render() { ctx.clearRect(0, 0, W, H);
 ctx.fillStyle = '#0d1e35';
 ctx.fillRect(0, 0, W, H);
-ctx.fillStyle = '#2ee59d';
+ctx.fillStyle = '#a8442e';
 ctx.font = 'bold 13px JetBrains Mono';
 ctx.fillText("NEWTON'S LAW OF COOLING", 20, 22);
 
-ctx.fillStyle = '#4a6580';
+ctx.fillStyle = '#6b7660';
 ctx.font = '11px JetBrains Mono';
 ctx.fillText('T(t) = T₀ + (Ti − T₀)·e^(−kt)', 20, 38);
 
@@ -170,7 +166,7 @@ ctx.moveTo(cx2, cy2 - 70);
 ctx.lineTo(cx2, cy2 + 30);
 ctx.stroke();
 
-ctx.fillStyle = '#ff6b6b';
+ctx.fillStyle = '#a8442e';
 ctx.beginPath();
 ctx.arc(cx2, cy2 + 30, 6, 0, Math.PI * 2);
 ctx.fill();
@@ -190,13 +186,13 @@ ctx.quadraticCurveTo(sx - 6, base - 10, sx, base - 20);
 ctx.stroke(); } }
 
 // temperature label above the cup
-ctx.fillStyle = '#ffb347';
+ctx.fillStyle = '#c17a4a';
 ctx.font = 'bold 13px JetBrains Mono';
 ctx.textAlign = 'center';
 ctx.fillText(T.toFixed(1) + '°C', cx2, cy2 - 78);
 
 // room temperature label below the cup
-ctx.fillStyle = '#4a6580';
+ctx.fillStyle = '#6b7660';
 ctx.font = '10px JetBrains Mono';
 ctx.fillText('T₀=' + ambientT + '°C', cx2, cy2 + 70);
 ctx.textAlign = 'left';
@@ -223,14 +219,12 @@ ctx.moveTo(gx, CY);
 ctx.lineTo(gx, CY + CH);
 ctx.stroke(); }
 
-// numbers labelling on the axis of the graph
 ctx.fillStyle = '#8ba3c0';
 ctx.font = '10px JetBrains Mono';
 ctx.textAlign = 'center';
 for (var ti = 0; ti <= 6; ti++) { var tx = CX + (CW / 6) * ti;
 ctx.fillText((ti * 100) + 's', tx, CY + CH + 14); }
 
-// temperature labels up the left side
 ctx.textAlign = 'right';
 var tempRange = initialT - ambientT + 10;
 for (var ri = 0; ri <= 5; ri++) { var ty = CY + CH - (CH / 5) * ri;
@@ -249,7 +243,7 @@ ctx.rotate(-Math.PI / 2);
 ctx.fillText('Temperature (°C)', 0, 0);
 ctx.restore();
 
-ctx.strokeStyle = 'rgba(168,85,247,0.5)';
+ctx.strokeStyle = 'rgba(156,122,60,0.5)';
 ctx.lineWidth = 1;
 ctx.setLineDash([4, 4]);
 var ambY = tempToY(ambientT, tempRange);
@@ -259,7 +253,7 @@ ctx.lineTo(CX + CW, ambY);
 ctx.stroke();
 ctx.setLineDash([]);
 
-ctx.fillStyle = '#a855f7';
+ctx.fillStyle = '#9c7a3c';
 ctx.font = '10px JetBrains Mono';
 ctx.fillText('T₀', CX + CW + 4, ambY + 4);
 
@@ -276,8 +270,7 @@ else { ctx.lineTo(px, py); }
 }
 ctx.stroke();
 
-// curve tracing to show only the part of the curve we have reached so far
-ctx.strokeStyle = '#2ee59d';
+ctx.strokeStyle = '#a8442e';
 ctx.lineWidth = 2.5;
 ctx.beginPath();
 var maxT2 = elapsed;
@@ -297,7 +290,7 @@ var elapsedClamped = elapsed;
 if (elapsedClamped > 600) { elapsedClamped = 600; }
 var dotX = CX + (elapsedClamped / 600) * CW;
 var dotY = tempToY(T, tempRange);
-ctx.fillStyle = '#ffb347';
+ctx.fillStyle = '#c17a4a';
 ctx.beginPath();
 ctx.arc(dotX, dotY, 5, 0, Math.PI * 2);
 ctx.fill();
@@ -309,25 +302,25 @@ if (ptTime > 600) { ptTime = 600; }
 var ppx = CX + (ptTime / 600) * CW;
 var ppy = tempToY(pt.T, tempRange);
 
-ctx.fillStyle = '#ff6b6b';
+ctx.fillStyle = '#a8442e';
 ctx.beginPath();
 ctx.arc(ppx, ppy, 3, 0, Math.PI * 2);
 ctx.fill(); }
 
 // reading box at the bottom side
 ctx.fillStyle = '#112240';
-ctx.strokeStyle = '#2ee59d';
+ctx.strokeStyle = '#a8442e';
 ctx.lineWidth = 1.5;
 window._roundRect(ctx, 20, H - 58, W - 40, 44, 8);
 ctx.fill();
 ctx.stroke();
 
-ctx.fillStyle = '#2ee59d';
+ctx.fillStyle = '#a8442e';
 ctx.font = '11px JetBrains Mono';
 ctx.fillText( 'T(t) = ' + ambientT + ' + (' + initialT + '−' + ambientT + ')·e^(−' + k + '·t)',
 36, H - 38 );
 
-ctx.fillStyle = '#ffb347';
+ctx.fillStyle = '#c17a4a';
 ctx.font = 'bold 14px JetBrains Mono';
 ctx.fillText( 'Current: T = ' + T.toFixed(2) + '°C   t = ' + Math.round(elapsed) + 's',
 36, H - 18 );
@@ -340,7 +333,6 @@ setReadings(readingEl, [
 ['k', k.toFixed(3),'s⁻¹'],
 ]); }
 
-// helper function to convert the temperature into y coordinate
 function tempToY(T, range) { var frac = (T - ambientT) / range;
 return CY + CH - frac * CH; }
 
