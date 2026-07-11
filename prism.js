@@ -29,6 +29,31 @@ if (Math.abs(sinE) > 1) { return null; }
 var e = Math.asin(sinE);
 return (2 * e - A) * 180 / Math.PI; }
 
+function physicsFor(colorName) {
+  var n = colors[colorName].n;
+  var Dm = getDm(n);
+  var nCalc = Dm !== null
+    ? (Math.sin((prismAngle + Dm) / 2 * Math.PI / 180) / Math.sin(prismAngle / 2 * Math.PI / 180)).toFixed(4)
+    : null;
+  return { n: n, Dm: Dm, nCalc: nCalc };
+}
+
+// Single source of truth for the calc panel text — used by prismUpdate, prismColor, and render.
+function updateCalc() {
+  var refColor = selectedColor === 'white' ? 'yellow' : selectedColor;
+  var phys = physicsFor(refColor);
+  var Dm = phys.Dm;
+  var nCalc = phys.nCalc !== null ? phys.nCalc : '—';
+  var DmText = Dm !== null ? Dm.toFixed(2) + '°' : '—';
+  var A = prismAngle;
+
+  document.getElementById('prismCalc').innerHTML =
+    '<span style="color:var(--green)">A</span> = ' + A + '°<br>' +
+    '<span style="color:var(--amber)">D<sub>m</sub></span> = ' + DmText + '<br>' +
+    '<span style="color:var(--cyan)">n</span> = sin((A+D<sub>m</sub>)/2) / sin(A/2) = ' + nCalc + '<br>' +
+    '<span style="color:var(--text-mute)">Refractive index of glass</span>';
+}
+
 // Building the row of color buttons one at a time with a plain for loop,
 var colorNames = Object.keys(colors);
 var colorButtonsHtml = '';
@@ -68,58 +93,27 @@ updateCalc();
 render(); };
 
 // will run when a color button is clicked.
-window.prismColor = function(c) { selectedColor = c;
-
-var buttons = document.querySelectorAll('.ctrl-row .mode-btn');
-for (var bi = 0; bi < buttons.length; bi++) { buttons[bi].classList.remove('active'); }
-render(); };
-
-function updateCalc() {
-var refColor;
-if (selectedColor === 'white') { refColor = 'yellow'; } 
-else { refColor = selectedColor; }
-
-var n = colors[refColor].n;
-var Dm = getDm(n);
-var A = prismAngle;
-
-var nCalc;
-if (Dm !== null) { nCalc = (Math.sin((A + Dm) / 2 * Math.PI / 180) / Math.sin(A / 2 * Math.PI / 180)).toFixed(4); }
-else { nCalc = '—'; }
-
-var DmText;
-if (Dm !== null) { DmText = Dm.toFixed(2) + '°'; } 
-else { DmText = '—'; }
-
-document.getElementById('prismCalc').innerHTML =
-'<span style="color:var(--green)">A</span> = ' + A + '°<br>' +
-'<span style="color:var(--amber)">D<sub>m</sub></span> = ' + DmText + '<br>' +
-'<span style="color:var(--cyan)">n</span> = sin((A+D<sub>m</sub>)/2) / sin(A/2) = ' + nCalc + '<br>' +
-'<span style="color:var(--text-mute)">Refractive index of glass</span>'; }
+window.prismColor = function(c) {
+  selectedColor = c;
+  updateCalc();
+  render();
+};
 
 var obsCount = 0;
-window.prismRecord = function() { obsCount++;
-var refColor;
-if (selectedColor === 'white') { refColor = 'yellow'; } 
-else { refColor = selectedColor; }
+window.prismRecord = function() {
+  obsCount++;
+  var refColor = selectedColor === 'white' ? 'yellow' : selectedColor;
+  var phys = physicsFor(refColor);
+  var Dm = phys.Dm;
+  var nCalc = phys.nCalc !== null ? phys.nCalc : '—';
+  var DmText = Dm !== null ? Dm.toFixed(1) : '—';
 
-var n = colors[refColor].n;
-var Dm = getDm(n);
-var A = prismAngle;
-
-var nCalc;
-if (Dm !== null) { nCalc = (Math.sin((A + Dm) / 2 * Math.PI / 180) / Math.sin(A / 2 * Math.PI / 180)).toFixed(4); }
-else { nCalc = '—'; }
-
-var DmText;
-if (Dm) { DmText = Dm.toFixed(1); } 
-else { DmText = '—'; }
-
-var list = document.getElementById('prismObsList');
-var row = document.createElement('div');
-row.innerHTML = '<span>#' + obsCount + ' ' + refColor + ' A=' + A + '°</span><span>D<sub>m</sub>=' + DmText + '° n=' + nCalc + '</span>';
-list.appendChild(row);
-list.scrollTop = list.scrollHeight; };
+  var list = document.getElementById('prismObsList');
+  var row = document.createElement('div');
+  row.innerHTML = '<span>#' + obsCount + ' ' + refColor + ' A=' + prismAngle + '°</span><span>D<sub>m</sub>=' + DmText + '° n=' + nCalc + '</span>';
+  list.appendChild(row);
+  list.scrollTop = list.scrollHeight;
+};
 
 var prismCX = 320;
 var prismCY = 200;
@@ -194,6 +188,11 @@ var colorsToDraw;
 if (selectedColor === 'white') { colorsToDraw = Object.keys(colors); } 
 else { colorsToDraw = [selectedColor]; }
 
+// Draw the incident ray ONCE. White light looks white before entering the prism;
+// only draw it in a single color when a specific color is selected.
+var incidentColor = selectedColor === 'white' ? '#ffffff' : colors[selectedColor].color;
+drawRay(inStartX, inStartY, inEndX, inEndY, incidentColor, 1);
+
 for (var idx = 0; idx < colorsToDraw.length; idx++) { var colorName = colorsToDraw[idx];
 var col = colors[colorName];
 var DmThisColor = getDm(col.n);
@@ -203,9 +202,6 @@ if (DmThisColor === null) { continue; }
 var alpha;
 if (selectedColor === 'white') {alpha = 0.85; } 
 else { alpha = 1; }
-
-// Incident ray before entering the prism
-drawRay(inStartX, inStartY, inEndX, inEndY, col.color, alpha);
 
 //refraction of ray inside the prism 
 var midX = prismCX - 5;
@@ -287,17 +283,9 @@ var refColor2;
 if (selectedColor === 'white') { refColor2 = 'yellow'; } 
 else { refColor2 = selectedColor; }
  
-var n = colors[refColor2].n;
-var Dm = getDm(n);
- 
-var nStr;
-if (Dm !== null) { nStr = (Math.sin((prismAngle + Dm) / 2 * Math.PI / 180) / Math.sin(prismAngle / 2 * Math.PI / 180)).toFixed(4); }
-else { nStr = '—'; }
- 
-ctx.fillStyle = '#e3dac8';
-ctx.strokeStyle = '#a8442e';
-ctx.lineWidth = 1.5;
-window._roundRect(ctx, dx + 10, dy + 130, 210, 75, 6);
+var phys = physicsFor(refColor2);
+var Dm = phys.Dm;
+var nStr = phys.nCalc !== null ? phys.nCalc : '—';
 ctx.fill();
 ctx.stroke();
  
@@ -357,6 +345,3 @@ loop();
 hintEl.textContent = 'Rotate prism with slider — find minimum deviation';
 return function() { cancelAnimationFrame(animId); };
 };
-
-
- 
