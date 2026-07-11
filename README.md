@@ -14,7 +14,7 @@
 <p>
  It's very easy just open the website and on the home screen you will see a cool animation of 3 different sine waves with a moving vernier calliper and an oscillating pendulum, click on the option of "Open the Lab" .
 
- ![image](https://www.image2url.com/r2/default/images/1782122933517-04dfcee8-3525-4f64-8aa1-5b70b240c0df.png)
+ <img width="3416" height="1894" alt="image" src="https://github.com/user-attachments/assets/cedd6613-1688-4540-b913-312a8fbe5ef6" />
 
 </p>
 <br>
@@ -22,21 +22,24 @@
 After clicking you will see 6 major domains across high school physics under each domain there are 2-3 titles of experiments , pick any domain of your choice. 
 
 
-![image](https://www.image2url.com/r2/default/images/1782123188921-70397c40-d5e3-4616-b105-0251cf0e137c.png)
+<img width="3414" height="1894" alt="image" src="https://github.com/user-attachments/assets/a409b3d8-0d1d-4f85-9756-524671442418" />
+
 
 <br>
 <p>
 after clicking on any domain you will see the title cards of the experiment , click on any experiment you want to experience .
 
-![image](https://www.image2url.com/r2/default/images/1782123409175-f5b0eb30-e010-43ec-94df-88b98c363341.png)
+<img width="3416" height="1898" alt="image" src="https://github.com/user-attachments/assets/3599d2c8-4f06-4781-af39-bd3a1c714c12" />
+
 
 <br>
 <p>
 after clicking on any experiment you will see the control panel , live reading box , theory box and also hint of that experiment ,, each experiment has its own unique way to represent the experiment like some has dragging feature , some has manual value entering feature, some has cool animations which can be played and all of the experiments have an option to record the readings which you are measuring.
 
-![image](https://www.image2url.com/r2/default/images/1782123562202-dcbf47b6-297e-4e20-b9e0-7dd6ecc18cb2.png)
+<img width="3412" height="1892" alt="image" src="https://github.com/user-attachments/assets/5bdf6afa-b0ef-4acf-b78b-4281529e93d0" />
 
-![image](https://www.image2url.com/r2/default/images/1782123943296-a128de67-73fc-4154-96a5-853aea522f47.png)
+<img width="3410" height="1878" alt="image" src="https://github.com/user-attachments/assets/68b6f2cb-0611-42f8-bfd4-64f6ce9c4955" />
+
 
 <br>
 <p>
