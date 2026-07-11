@@ -21,7 +21,7 @@ let measuredT = null;
 
 const pid = 'pend_' + Math.random().toString(36).slice(2, 8);
 
-// building the Controls Panel  
+// building the Controls Panel
 
 ctrlEl.innerHTML = ` <div class="ctrl-item">
 <label>Length L (m): <span id="pendL">0.50</span></label>
@@ -35,7 +35,7 @@ ctrlEl.innerHTML = ` <div class="ctrl-item">
 <button class="mode-btn" onclick="${pid}_reset()" style="flex:1;">↺ Reset</button>
 </div>
 <div style="margin-top:10px;">
-<button class="mode-btn" onclick="${pid}_startTime()" style="width:100%;background:rgba(46,229,157,0.1);border-color:var(--green);color:var(--green);" id="pendTimeBtn">⏱ Time 10 Oscillations</button>
+<button class="mode-btn" onclick="${pid}_startTime()" style="width:100%;background:rgba(168,68,46,0.1);border-color:var(--green);color:var(--green);" id="pendTimeBtn">⏱ Time 10 Oscillations</button>
 <div id="pendTimeStatus" style="font-size:11px;color:var(--text-mute);margin-top:6px;font-family:var(--font-mono);">
 Press button, then watch 10 swings
 </div>
@@ -44,9 +44,8 @@ Press button, then watch 10 swings
 <div class="obs-list" id="pendObsList"></div>
 </div>`;
 
-// function which will be called when the user moves a slider ,, updates the values and restarts the pendulum from its starting angle
 window[pid + '_update'] = function() {
-length    = parseFloat(document.getElementById('pendLRange').value);
+length = parseFloat(document.getElementById('pendLRange').value);
 amplitude = parseFloat(document.getElementById('pendARange').value);
 
 document.getElementById('pendL').textContent = length.toFixed(2);
@@ -102,10 +101,10 @@ function render() { ctx.clearRect(0, 0, W, H);
 ctx.fillStyle = '#0d1e35';
 ctx.fillRect(0, 0, W, H);
 
-ctx.fillStyle = '#2ee59d';
+ctx.fillStyle = '#a8442e';
 ctx.font = 'bold 13px JetBrains Mono';
 ctx.fillText('SIMPLE PENDULUM', 20, 22);
-ctx.fillStyle = '#4a6580';
+ctx.fillStyle = '#6b7660';
 ctx.font = '11px JetBrains Mono';
 ctx.fillText('T = 2π√(L/g)  →  g = 4π²L / T²', 20, 38);
 
@@ -141,7 +140,7 @@ ctx.moveTo(pivotX, pivotY);
 ctx.lineTo(bobX, bobY);
 ctx.stroke();
  
-ctx.strokeStyle = 'rgba(46,229,157,0.3)';
+ctx.strokeStyle = 'rgba(168,68,46,0.3)';
 ctx.lineWidth = 1;
 ctx.setLineDash([4, 3]); 
 ctx.beginPath();
@@ -149,7 +148,7 @@ ctx.moveTo(pivotX + 20, pivotY);
 ctx.lineTo(pivotX + 20, bobY);
 ctx.stroke();
 ctx.setLineDash([]); 
-ctx.fillStyle = '#2ee59d';
+ctx.fillStyle = '#a8442e';
 ctx.font = '11px JetBrains Mono';
 ctx.fillText(`L = ${length.toFixed(2)} m`, pivotX + 26, (pivotY + bobY) / 2 + 4);
  
@@ -183,13 +182,13 @@ const T = theoreticalT();
 const calcG = (4 * Math.PI * Math.PI * length) / (T * T);
  
 ctx.fillStyle = '#112240';
-ctx.strokeStyle = '#2ee59d';
+ctx.strokeStyle = '#a8442e';
 ctx.lineWidth = 1.5;
 window._roundRect(ctx, 20, H - 72, W - 40, 58, 8); 
 ctx.fill();
 ctx.stroke();
  
-ctx.fillStyle = '#2ee59d';
+ctx.fillStyle = '#a8442e';
 ctx.font = '11px JetBrains Mono';
 ctx.fillText(`T (theoretical) = 2π√(${length.toFixed(2)}/${g}) = ${T.toFixed(3)} s`, 36, H - 50);
 ctx.fillText(`g = 4π²L/T² = 4π²×${length.toFixed(2)}/${(T * T).toFixed(3)} = ${calcG.toFixed(3)} m/s²`, 36, H - 32);
@@ -204,15 +203,20 @@ setReadings(readingEl, [ ['Length L', length.toFixed(2), 'm'],
 ]);
 }
  
+// now it's time for the animation  loop
+// it will run every frame (60 times per second) to update and redraw the pendulum
 let animId;
-function loop() { if (running) {
+function loop() {
+if (running) {
+//pendulum's angular acceleration = -(g / L) × sin(angle)
+// this is actually the real physics formula for a simple pendulum
 angVel += (-g / length) * Math.sin(angle) * dt;
 angVel *= 0.9998;
 const prevSign = Math.sign(angle);
 angle += angVel;
 time  += dt;
  
-// counting oscillations 
+// count oscillations (an oscillation completes each time the pendulum crosses from the right side)
 
 if (timing && prevSign > 0 && Math.sign(angle) <= 0) {
 oscCount++;
@@ -224,7 +228,9 @@ timing    = false; document.getElementById('pendTimeStatus').textContent = `✅ 
 } } }
  
 render();
-animId = requestAnimationFrame(loop); }
+animId = requestAnimationFrame(loop);
+}
 loop();
 hintEl.textContent = 'Adjust length & amplitude with sliders';
-return () => cancelAnimationFrame(animId); };
+return () => cancelAnimationFrame(animId);
+};
