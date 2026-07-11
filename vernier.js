@@ -44,7 +44,8 @@ Drag the jaw left/right to set MSR
 <div class="obs-list" id="vObsList"></div>
 </div> `;
 
-window[vid + '_setMode'] = function(m) { mode = m;
+window[vid + '_setMode'] = function(m) {
+mode = m;
 // to highlight the active button 
 document.getElementById('vMode1').classList.toggle('active', m === 'drag');
 document.getElementById('vMode2').classList.toggle('active', m === 'type');
@@ -65,10 +66,11 @@ vsrDiv = Math.max(0, Math.min(9,  parseInt(document.getElementById('vVSR').value
 render(); 
 };
 
+  // to record the reading and display it
 let obsCount = 0; 
 window[vid + '_recordObs'] = function() {
 const reading = (msrMM + vsrDiv * LC).toFixed(2);
-obsCount++;
+    obsCount++;
 
 const list = document.getElementById('vObsList');
 const row = document.createElement('div');
@@ -88,6 +90,7 @@ const MM_SCALE = 10;
 const JAW_H = 120;   
 
 function msr2px(msr) { return MAIN_X + msr * MM_SCALE; }
+// main drawing function (called every time something changes)
 function render() {
 ctx.clearRect(0, 0, W, H);
 ctx.fillStyle = '#0D1E35';
@@ -99,9 +102,9 @@ ctx.fillText('VERNIER CALLIPER', 20, 22);
 ctx.fillStyle = '#6b7660';
 ctx.font = '11px JetBrains Mono';
 ctx.fillText('LC = 1 MSD − 1 VSD = 0.1 mm', 20, 38);
-ctx.fillStyle   = '#1a2f28';
+ctx.fillStyle = '#1a2f28';
 ctx.strokeStyle = '#6b7660';
-ctx.lineWidth   = 1.5;
+ctx.lineWidth = 1.5;
 ctx.fillRect(MAIN_X, MAIN_Y, MAIN_W, MAIN_H);
 ctx.strokeRect(MAIN_X, MAIN_Y, MAIN_W, MAIN_H);
 
@@ -121,18 +124,19 @@ ctx.fillText(mm / 10 + ' cm', tickX, MAIN_Y + MAIN_H + 16); }
 ctx.textAlign = 'left';
 
 // drawing the left side jaw that ofc don't move
-ctx.fillStyle   = '#1a2f28';
+ctx.fillStyle = '#1a2f28';
 ctx.strokeStyle = '#6b7660';
-ctx.lineWidth   = 1.5;
+ctx.lineWidth = 1.5;
 ctx.fillRect(MAIN_X - 10, MAIN_Y - 50, 16, JAW_H + 20);
 ctx.strokeRect(MAIN_X - 10, MAIN_Y - 50, 16, JAW_H + 20);
 
+//getting the movable jaw + vernier scale
     const vjX = msr2px(msrMM);         
     const VERN_W = nDivisions * 9;     
 
-ctx.fillStyle   = '#1a2f28';
+ctx.fillStyle = '#1a2f28';
 ctx.strokeStyle = '#a8442e'; 
-ctx.lineWidth   = 1.5;
+ctx.lineWidth = 1.5;
 ctx.fillRect(vjX - 10, MAIN_Y - 50, VERN_W + 20, JAW_H + 20);
 ctx.strokeRect(vjX - 10, MAIN_Y - 50, VERN_W + 20, JAW_H + 20);
 
@@ -153,7 +157,7 @@ ctx.textAlign = 'left';
 // to get a dashed vertical line at the coinciding (matching) division
 const coinX = vjX + vsrDiv * VSD_PX;
 ctx.strokeStyle = '#9c7a3c';
-ctx.lineWidth   = 1;
+ctx.lineWidth = 1;
 ctx.setLineDash([4, 3]); 
 ctx.beginPath();
 ctx.moveTo(coinX, MAIN_Y - 10);
@@ -178,9 +182,9 @@ ctx.font = 'bold 11px JetBrains Mono';
 ctx.fillText(`MSR = ${msrMM} mm`, vjX - 30, MAIN_Y - 34);
 const reading = msrMM + vsrDiv * LC; // the final measurement
 
-ctx.fillStyle   = '#1a2f28';
+ctx.fillStyle = '#1a2f28';
 ctx.strokeStyle = '#a8442e';
-ctx.lineWidth   = 1.5;
+ctx.lineWidth = 1.5;
 roundRect(ctx, 20, H - 72, W - 40, 58, 8);
 ctx.fill();
 ctx.stroke();
@@ -197,25 +201,28 @@ setReadings(readingEl, [ ['MSR',msrMM.toFixed(1),'mm'],
 ['Reading', reading.toFixed(2),'mm'],
 ]);
 }
-canvas.addEventListener('mousedown', e => { if (mode !== 'drag') return; 
-const rect   = canvas.getBoundingClientRect();
+
+// named handlers instead of anonymous ones, so cleanup() can actually remove them
+
+function onMouseDown(e) { if (mode !== 'drag') return; 
+const rect = canvas.getBoundingClientRect();
 const scaleX = W / rect.width;
-const mx     = (e.clientX - rect.left) * scaleX;
-const my     = (e.clientY - rect.top) * (H / rect.height);
-const vjX    = msr2px(msrMM);
+const mx  = (e.clientX - rect.left) * scaleX;
+const my  = (e.clientY - rect.top) * (H / rect.height);
+const vjX = msr2px(msrMM);
 
 if (Math.abs(mx - vjX) < 60 && my > MAIN_Y - 60 && my < MAIN_Y + JAW_H) {
-dragging     = true;
-dragStartX   = mx;
+dragging = true;
+dragStartX = mx;
 dragStartMSR = msrMM;
 canvas.style.cursor = 'grabbing'; 
 }
-});
+}
 
-canvas.addEventListener('mousemove', e => { if (!dragging) return;
-const rect   = canvas.getBoundingClientRect();
+function onMouseMove(e) { if (!dragging) return;
+const rect = canvas.getBoundingClientRect();
 const scaleX = W / rect.width;
-const mx     = (e.clientX - rect.left) * scaleX;
+const mx  = (e.clientX - rect.left) * scaleX;
 
 const delta = (mx - dragStartX) / MM_SCALE;
 const raw = Math.max(0, Math.min(40, dragStartMSR + delta));
@@ -227,27 +234,29 @@ if (vDiv >= nDivisions) { vDiv = 0; msrInt += 1; }
 msrMM = msrInt;
 vsrDiv = vDiv;
 render(); 
-});
+}
 
-canvas.addEventListener('mouseup', () => { dragging = false; canvas.style.cursor = 'ew-resize'; });
-canvas.addEventListener('mouseleave',() => { dragging = false; canvas.style.cursor = 'ew-resize'; });
+function onMouseUp() { dragging = false; canvas.style.cursor = 'ew-resize'; }
+function onMouseLeave() { dragging = false; canvas.style.cursor = 'ew-resize'; }
 
-canvas.addEventListener('touchstart', e => { if (mode !== 'drag') return;
+// touch events (for mobile/tablet users) 
+
+function onTouchStart(e) { if (mode !== 'drag') return;
 e.preventDefault(); 
 
-const touch  = e.touches[0]; 
-const rect   = canvas.getBoundingClientRect();
-dragStartX   = (touch.clientX - rect.left) * (W / rect.width);
+const touch= e.touches[0]; 
+const rect  = canvas.getBoundingClientRect();
+dragStartX = (touch.clientX - rect.left) * (W / rect.width);
 dragStartMSR = msrMM;
-dragging     = true;
-}, { passive: false });
+dragging = true;
+}
 
-canvas.addEventListener('touchmove', e => { if (!dragging) return;
+function onTouchMove(e) { if (!dragging) return;
 e.preventDefault();
 
 const touch = e.touches[0];
 const rect  = canvas.getBoundingClientRect();
-const mx    = (touch.clientX - rect.left) * (W / rect.width);
+const mx = (touch.clientX - rect.left) * (W / rect.width);
 const delta = (mx - dragStartX) / MM_SCALE;
 
 const raw = Math.max(0, Math.min(40, dragStartMSR + delta));
@@ -259,15 +268,32 @@ if (vDiv >= nDivisions) { vDiv = 0; msrInt += 1; }
 msrMM = msrInt;
 vsrDiv = vDiv;
 
-render(); }, { passive: false });
+render(); 
+}
 
-canvas.addEventListener('touchend', () => { dragging = false; });
+function onTouchEnd() { dragging = false; }
+
+canvas.addEventListener('mousedown', onMouseDown);
+canvas.addEventListener('mousemove', onMouseMove);
+canvas.addEventListener('mouseup', onMouseUp);
+canvas.addEventListener('mouseleave', onMouseLeave);
+canvas.addEventListener('touchstart', onTouchStart, { passive: false });
+canvas.addEventListener('touchmove', onTouchMove, { passive: false });
+canvas.addEventListener('touchend', onTouchEnd);
+
 render();
-return function cleanup() {};
+return function cleanup() {
+canvas.removeEventListener('mousedown', onMouseDown);
+canvas.removeEventListener('mousemove', onMouseMove);
+canvas.removeEventListener('mouseup', onMouseUp);
+canvas.removeEventListener('mouseleave', onMouseLeave);
+canvas.removeEventListener('touchstart', onTouchStart);
+canvas.removeEventListener('touchmove', onTouchMove);
+canvas.removeEventListener('touchend', onTouchEnd);
+};
 };
 
-function roundRect(ctx, x, y, w, h, r) {
-ctx.beginPath();
+function roundRect(ctx, x, y, w, h, r) { ctx.beginPath();
 ctx.moveTo(x+r,y);
 ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
 ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w, y+h,x+w-r,y+h);
