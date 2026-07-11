@@ -10,7 +10,6 @@ const TUBE_LENGTH_METRES = 1.0;
 const SPEED_OF_SOUND = 346;          
 const END_CORRECTION = 0.3 * 0.025;  
 
-// default state
 let frequency = 512;       
 let waterLevel = 0.85;      
 let isDragging = false;
@@ -19,6 +18,8 @@ let dragStartWaterLevel = 0;
 let isForkRinging = false;
 let animTime = 0;           
 let animFrameId = null;
+
+const rid = 'res_' + Math.random().toString(36).slice(2, 8);
 
 const TUBE_LEFT = 220;
 const TUBE_TOP = 50;
@@ -33,7 +34,6 @@ function getFirstResonanceLength()  { return SPEED_OF_SOUND / (4 * frequency) - 
 function getSecondResonanceLength() { return 3 * SPEED_OF_SOUND / (4 * frequency) - END_CORRECTION; }
 function getAirColumnLength() { return (1 - waterLevel) * TUBE_LENGTH_METRES; }
 
-  // are we close enough to a resonance point? ( i.e within 1.5cm)
 function isAtResonance() { const airCol = getAirColumnLength();
 const l1 = getFirstResonanceLength();
 const l2 = getSecondResonanceLength();
@@ -42,16 +42,16 @@ return Math.abs(airCol - l1) < 0.015 || Math.abs(airCol - l2) < 0.015; }
   // building the control panel 
 ctrlEl.innerHTML = ` <div class="ctrl-item">
 <label>Tuning Fork Frequency (Hz): <span id="resFreq">512</span></label>
-<input type="range" id="resFreqR" min="256" max="1024" step="16" value="512" oninput="resSetFreq()" />
+<input type="range" id="resFreqR" min="256" max="1024" step="16" value="512" oninput="${rid}_setFreq()" />
 </div>
 <div style="font-size:12px;color:var(--text-mute);margin-bottom:8px;">↕ Drag water surface up/down on canvas</div>
 <div class="ctrl-item">
 <label>Or type water level (0–100%):</label>
-<input type="number" id="resWLtype" min="0" max="100" step="1" value="85" oninput="resTypeWL()" />
+<input type="number" id="resWLtype" min="0" max="100" step="1" value="85" oninput="${rid}_typeWL()" />
 </div>
 <div style="display:flex;gap:8px;margin-top:4px;">
-<button class="mode-btn active" id="resRingBtn" onclick="resToggleRing()" style="flex:1;">🔔 Ring Fork</button>
-<button class="mode-btn" onclick="resReset()" style="flex:1;">↺ Reset</button>
+<button class="mode-btn active" id="resRingBtn" onclick="${rid}_toggleRing()" style="flex:1;">🔔 Ring Fork</button>
+<button class="mode-btn" onclick="${rid}_reset()" style="flex:1;">↺ Reset</button>
 </div>
 <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;margin-top:8px;font-size:12px;color:var(--text-dim);">
 <div>L₁ (1st resonance): <span id="resL1" style="color:var(--amber);font-family:var(--font-mono);">—</span>
@@ -61,29 +61,29 @@ ctrlEl.innerHTML = ` <div class="ctrl-item">
 </div>
 </div>
 <div class="obs-recorder">
-<button onclick="resRecord()">＋ Record Reading</button>
+<button onclick="${rid}_record()">＋ Record Reading</button>
 <div class="obs-list" id="resObsList"></div>
 </div> `;
 
-window.resSetFreq = function() { frequency = parseInt(document.getElementById('resFreqR').value);
+window[rid + '_setFreq'] = function() { frequency = parseInt(document.getElementById('resFreqR').value);
 document.getElementById('resFreq').textContent = frequency;
 updateFormulaDisplay();
 if (!isForkRinging) render(); };
 
-window.resTypeWL = function() { const percent = Math.max(0, Math.min(100, parseFloat(document.getElementById('resWLtype').value) || 50));
+window[rid + '_typeWL'] = function() { const percent = Math.max(0, Math.min(100, parseFloat(document.getElementById('resWLtype').value) || 50));
 waterLevel = percent / 100;
 updateFormulaDisplay();
 if (!isForkRinging) render();
 };
 
-window.resToggleRing = function() { isForkRinging = !isForkRinging;
+window[rid + '_toggleRing'] = function() { isForkRinging = !isForkRinging;
 const btn = document.getElementById('resRingBtn');
 btn.textContent = isForkRinging ? '⏸ Stop' : '🔔 Ring Fork';
 btn.classList.toggle('active', isForkRinging);
 if (isForkRinging) animFrameId = requestAnimationFrame(animate);
 else { cancelAnimationFrame(animFrameId); render(); } };
 
-window.resReset = function() { isForkRinging = false;
+window[rid + '_reset'] = function() { isForkRinging = false;
 cancelAnimationFrame(animFrameId);
 waterLevel = 0.85;
 frequency = 512;
@@ -99,7 +99,7 @@ render(); };
 // recording observation
 let observationCount = 0;
 
-window.resRecord = function() { observationCount++;
+window[rid + '_record'] = function() { observationCount++;
 const airCol = getAirColumnLength();
 const list = document.getElementById('resObsList');
 const row = document.createElement('div');
@@ -154,10 +154,10 @@ setReadings(readingEl, [
 ['Speed v', (l2 > 0 && l2 < 1) ? calculatedSpeed.toFixed(1) : '—', 'm/s'],
 ]); }
 
-function drawTitle() { ctx.fillStyle = '#2ee59d';
+function drawTitle() { ctx.fillStyle = '#a8442e';
 ctx.font = 'bold 13px JetBrains Mono';
 ctx.fillText('RESONANCE TUBE', 20, 22);
-ctx.fillStyle = '#4a6580';
+ctx.fillStyle = '#6b7660';
 ctx.font = '11px JetBrains Mono';
 ctx.fillText('v = 2f(L₂ − L₁)  |  f = ' + frequency + ' Hz', 20, 38); }
 
@@ -168,22 +168,19 @@ ctx.beginPath();
 ctx.moveTo(TUBE_LEFT, TUBE_TOP);
 ctx.lineTo(TUBE_LEFT, TUBE_BOTTOM);
 ctx.stroke();
-
 ctx.beginPath();
 ctx.moveTo(TUBE_LEFT + TUBE_WIDTH, TUBE_TOP);
 ctx.lineTo(TUBE_LEFT + TUBE_WIDTH, TUBE_BOTTOM);
 ctx.stroke();
-
 ctx.beginPath();
 ctx.moveTo(TUBE_LEFT - 4, TUBE_BOTTOM);
 ctx.lineTo(TUBE_LEFT + TUBE_WIDTH + 4, TUBE_BOTTOM);
 ctx.lineWidth = 4;
 ctx.stroke(); }
 
-function drawScaleMarkings() { ctx.fillStyle = '#4a6580';
+function drawScaleMarkings() { ctx.fillStyle = '#6b7660';
 ctx.font = '10px JetBrains Mono';
 
-// major ticks every 10 cm and minor ticks every 5cm
 for (let cm = 0; cm <= 100; cm += 10) { const y = TUBE_BOTTOM - metresToPx(cm / 100);
 ctx.strokeStyle = '#1e3a5f';
 ctx.lineWidth = 1;
@@ -206,7 +203,6 @@ function drawWater(airColumnM) { const waterTopY = TUBE_TOP + (1 - waterLevel) *
 ctx.fillStyle = 'rgba(40,100,180,0.75)';
 ctx.fillRect(TUBE_LEFT + 2, waterTopY, TUBE_WIDTH - 4, TUBE_BOTTOM - waterTopY);
 
-// surface line of water
 ctx.strokeStyle = 'rgba(100,200,255,0.8)';
 ctx.lineWidth = 2;
 ctx.beginPath();
@@ -214,8 +210,7 @@ ctx.moveTo(TUBE_LEFT + 2, waterTopY);
 ctx.lineTo(TUBE_LEFT + TUBE_WIDTH - 2, waterTopY);
 ctx.stroke();
 
-    
-ctx.fillStyle = '#2ee59d';
+ctx.fillStyle = '#a8442e';
 ctx.beginPath();
 ctx.arc(TUBE_LEFT - 14, waterTopY, 8, 0, Math.PI * 2);
 ctx.fill();
@@ -255,9 +250,8 @@ ctx.textAlign = 'right';
 ctx.fillText(`L₁=${(l1 * 100).toFixed(1)}cm`, TUBE_LEFT - 44, y1 + 4);
 ctx.textAlign = 'left'; }
 
-// Second resonance (purple dashed line)
 if (l2 > 0 && l2 < TUBE_LENGTH_METRES) { const y2 = TUBE_BOTTOM - metresToPx(l2);
-ctx.strokeStyle = 'rgba(168,85,247,0.6)';
+ctx.strokeStyle = 'rgba(156,122,60,0.6)';
 ctx.lineWidth = 1.5;
 ctx.setLineDash([4, 3]);
 ctx.beginPath();
@@ -265,7 +259,7 @@ ctx.moveTo(TUBE_LEFT - 40, y2);
 ctx.lineTo(TUBE_LEFT + TUBE_WIDTH, y2);
 ctx.stroke();
 ctx.setLineDash([]);
-ctx.fillStyle = '#a855f7';
+ctx.fillStyle = '#9c7a3c';
 ctx.font = 'bold 10px JetBrains Mono';
 ctx.textAlign = 'right';
 ctx.fillText(`L₂=${(l2 * 100).toFixed(1)}cm`, TUBE_LEFT - 44, y2 + 4);
@@ -289,7 +283,7 @@ const y = waterTopY + fraction * (TUBE_BOTTOM - waterTopY - 2);
 const distFromSurface = fraction * airColumnM;
 
 // Cosine standing wave pattern--> node at closed end (water surface), antinode at open top
-const displacement = Math.cos(Math.PI * distFromSurface / airColumnM) * amplitude * wavePhase;
+const displacement = Math.sin(Math.PI * distFromSurface / (2 * airColumnM)) * amplitude * wavePhase;
 if (i === 0) ctx.moveTo(tubeCentreX + displacement, y);
 else ctx.lineTo(tubeCentreX + displacement, y);
 }
@@ -299,10 +293,10 @@ function drawResonanceAlert(atResonance) { if (!atResonance || !isForkRinging) r
  
 // cyan highlight blinking/pulse at resonance condition
 const pulseAlpha = 0.4 + 0.3 * Math.sin(animTime * 8);
-ctx.fillStyle = `rgba(46,229,157,${pulseAlpha})`;
+ctx.fillStyle = `rgba(168,68,46,${pulseAlpha})`;
 ctx.fillRect(TUBE_LEFT + 2, TUBE_TOP, TUBE_WIDTH - 4, TUBE_HEIGHT_PX);
  
-ctx.fillStyle = '#2ee59d';
+ctx.fillStyle = '#a8442e';
 ctx.font = 'bold 13px JetBrains Mono';
 ctx.textAlign = 'center';
 ctx.fillText('RESONANCE!', TUBE_LEFT + TUBE_WIDTH / 2, TUBE_TOP - 10);
@@ -318,7 +312,6 @@ ctx.moveTo(forkX, forkY + 20);
 ctx.lineTo(forkX, forkY + 40);
 ctx.stroke();
  
-// base of prong (y split)
 ctx.beginPath();
 ctx.moveTo(forkX, forkY + 20);
 ctx.lineTo(forkX - 10, forkY + 5);
@@ -328,7 +321,6 @@ ctx.moveTo(forkX, forkY + 20);
 ctx.lineTo(forkX + 10, forkY + 5);
 ctx.stroke();
  
-// tips of the prong
 ctx.beginPath();
 ctx.moveTo(forkX - 10, forkY + 5);
 ctx.lineTo(forkX - 14, forkY - 10);
@@ -365,7 +357,7 @@ ctx.lineWidth = 1.5;
 window._roundRect(ctx, panelX, panelY, 260, 220, 8);
 ctx.fill();
 ctx.stroke();
-ctx.fillStyle = '#2ee59d';
+ctx.fillStyle = '#a8442e';
 ctx.font = 'bold 12px JetBrains Mono';
 ctx.fillText('READINGS', panelX + 14, panelY + 22);
  
@@ -373,12 +365,11 @@ const rows = [
 ['Frequency f',frequency + ' Hz', '#64dfdf'],
 ['Air column L',   (airColumnM * 100).toFixed(1) + ' cm','#ffb347'],
 ['L₁ (1st res.)',  l1 > 0 ? (l1 * 100).toFixed(1) + ' cm' : 'N/A', '#ffb347'],
-['L₂ (2nd res.)',  (l2 > 0 && l2 < 1) ? (l2 * 100).toFixed(1) + ' cm' : 'N/A', '#a855f7'],
-['v = 2f(L₂-L₁)', (l2 > 0 && l2 < 1) ? speed.toFixed(1) + ' m/s' : '—', '#2ee59d'],
-];
+['L₂ (2nd res.)',  (l2 > 0 && l2 < 1) ? (l2 * 100).toFixed(1) + ' cm' : 'N/A', '#9c7a3c'],
+['v = 2f(L₂-L₁)', (l2 > 0 && l2 < 1) ? speed.toFixed(1) + ' m/s' : '—', '#a8442e'], ];
  
 rows.forEach(([label, value, colour], i) => { const rowY = panelY + 44 + i * 34;
-ctx.fillStyle = '#4a6580';
+ctx.fillStyle = '#6b7660';
 ctx.font = '10px JetBrains Mono';
 ctx.fillText(label, panelX + 14, rowY);
 ctx.fillStyle = colour;
@@ -387,13 +378,13 @@ ctx.fillText(value, panelX + 14, rowY + 16); });
  
 // status badge at the bottom of panel
 const badgeY = panelY + 210;
-ctx.fillStyle = atResonance ? 'rgba(46,229,157,0.2)' : 'rgba(74,101,128,0.15)';
-ctx.strokeStyle = atResonance ? '#2EE59D' : '#4A6580';
+ctx.fillStyle = atResonance ? 'rgba(168,68,46,0.2)' : 'rgba(107,118,96,0.15)';
+ctx.strokeStyle = atResonance ? '#A8442E' : '#6B7660';
 ctx.lineWidth = 1;
 window._roundRect(ctx, panelX + 14, badgeY, 232, 28, 6);
 ctx.fill();
 ctx.stroke();
-ctx.fillStyle = atResonance ? '#2EE59D' : '#4A6580';
+ctx.fillStyle = atResonance ? '#A8442E' : '#6B7660';
 ctx.font = 'bold 11px JetBrains Mono';
 ctx.textAlign = 'center';
 ctx.fillText( atResonance ? '✓ AT RESONANCE' : 'Adjust water level to resonance',
@@ -401,12 +392,12 @@ panelX + 14 + 116, badgeY + 18 );
 ctx.textAlign = 'left'; }
  
 function drawFormulaBar(l2, speed) { ctx.fillStyle = '#112240';
-ctx.strokeStyle = '#2ee59d';
+ctx.strokeStyle = '#a8442e';
 ctx.lineWidth = 1.5;
 window._roundRect(ctx, 20, HEIGHT - 44, WIDTH - 40, 30, 8);
 ctx.fill();
 ctx.stroke();
-ctx.fillStyle = '#2ee59d';
+ctx.fillStyle = '#a8442e';
 ctx.font = '11px JetBrains Mono';
 const speedText = (l2 > 0 && l2 < 1) ? speed.toFixed(1) : '—';
 ctx.fillText(`λ/4 = L₁ + e  |  3λ/4 = L₂ + e  |  v = 2f(L₂ − L₁) = ${speedText} m/s`, 36, HEIGHT - 24);
@@ -440,7 +431,7 @@ canvas.style.cursor = 'ns-resize'; });
  
 canvas.addEventListener('mouseleave', () => { isDragging = false; });
 canvas.style.cursor = 'ns-resize';
-hintEl.textContent = 'Drag the green handle ↕ to raise/lower water level';
+hintEl.textContent= 'Drag the green handle ↕ to raise/lower water level';
 updateFormulaDisplay();
 render();
 return function cleanup() {
@@ -448,7 +439,3 @@ cancelAnimationFrame(animFrameId);
 isForkRinging = false;
 };
 };
-
-
-
-  
